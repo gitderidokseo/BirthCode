@@ -231,15 +231,33 @@ window.onPaymentSuccess = async function () {
 
     // 사주 명식 정보 구성
     const birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    const language = currentLang === 'ko' ? 'ko' : 'en'; // 서버는 현재 한국어/영어만 주로 대응
+    const language = currentLang === 'ko' ? 'ko' : 'en';
+
+    // App Check 토큰 가져오기 (Promise)
+    const getAppToken = () => new Promise(resolve => {
+        if (typeof Android !== 'undefined' && Android.getAppCheckToken) {
+            window.receiveAppCheckToken = (token) => {
+                delete window.receiveAppCheckToken;
+                resolve(token);
+            };
+            Android.getAppCheckToken('receiveAppCheckToken');
+        } else {
+            resolve(''); // 브라우저 환경 등에서는 빈값
+        }
+    });
 
     try {
+        const appCheckToken = await getAppToken();
+
         // Firebase Functions 호출
         const response = await fetch(
             'https://us-central1-birthcode-60426.cloudfunctions.net/analyzeSaju',
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Firebase-AppCheck': appCheckToken // App Check 헤더 추가
+                },
                 body: JSON.stringify({
                     birthDate: birthDate,
                     aiModel: 'Claude',

@@ -159,6 +159,24 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
             billingClient.launchBillingFlow(this@MainActivity, billingFlowParams)
         }
+
+        @JavascriptInterface
+        fun getAppCheckToken(callbackName: String) {
+            FirebaseAppCheck.getInstance()
+                .getAppCheckToken(false)
+                .addOnSuccessListener { tokenResult ->
+                    val token = tokenResult.token
+                    runOnUiThread {
+                        webView.evaluateJavascript("javascript:$callbackName('$token')", null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("AppCheck", "Failed to get AppCheck token", e)
+                    runOnUiThread {
+                        webView.evaluateJavascript("javascript:$callbackName('')", null)
+                    }
+                }
+        }
     }
 
     override fun onBackPressed() {

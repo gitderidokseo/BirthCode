@@ -213,10 +213,11 @@ async function analyzeWithGemini(birthDate: string, language: string): Promise<S
 }
 
 export const analyzeSaju = onRequest(
-  { 
+  {
     cors: true,
     timeoutSeconds: 120,
-    memory: "512MiB"
+    memory: "512MiB",
+    enforceAppCheck: true
   },
   async (request, response) => {
     if (request.method !== "POST") {
