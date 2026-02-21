@@ -1,0 +1,40 @@
+# 빌드 결과물
+build/
+.gradle/
+
+# Android SDK 로컬 설정 (개인 PC마다 경로가 다름)
+local.properties
+
+# IntelliJ / Android Studio 설정
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/.gitignore
+*.iml
+
+# 운영체제 생성 파일
+.DS_Store
+Thumbs.db
+
+# 서명 키 파일 (절대 커밋 금지)
+*.jks
+*.keystore
+keystore.properties
+
+# 프로파일링 / 캡처 파일
+captures/
+*.hprof
+
+# 코드 커버리지 리포트
+*.exec
+
+# ProGuard 출력
+*.apk
+*.aab
+*.ap_
+
+# 테스트 로그
+lint/
