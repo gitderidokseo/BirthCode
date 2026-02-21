@@ -240,6 +240,23 @@ textarea:focus {
     transform: translateY(-1px);
 }
 
+.btn-success-small {
+    padding: 10px;
+    background-color: var(--success);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-success-small:hover {
+    background-color: #388E3C;
+    box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+}
+
 .btn-ai {
     width: 100%;
     padding: 14px;
@@ -335,7 +352,7 @@ textarea:focus {
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
     padding: 14px 16px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
     line-height: 1.8;
     margin-bottom: 12px;
@@ -367,8 +384,8 @@ textarea:focus {
 }
 
 .interpretation-box p {
-    font-size: 13.5px;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.8;
     color: var(--text-primary);
     margin-bottom: 10px;
 }
@@ -454,8 +471,8 @@ textarea:focus {
 }
 
 .ai-content-box .fortune-section p {
-    font-size: 13.5px;
-    line-height: 1.75;
+    font-size: 16px;
+    line-height: 1.8;
     color: var(--text-primary);
 }
 
@@ -498,6 +515,41 @@ textarea:focus {
 /* ===== 유틸리티 ===== */
 .hidden {
     display: none !important;
+}
+
+.copy-notice {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 12px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    text-align: center;
+    margin: 16px 0 10px;
+    line-height: 1.6;
+    border: 1px dashed var(--primary);
+    font-weight: 500;
+}
+
+.modal-fortune-section {
+    background: #f9f9ff;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+}
+
+.modal-fortune-section h4 {
+    color: var(--primary);
+    font-size: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 4px;
+}
+
+.modal-fortune-section p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-primary);
 }
 
 /* ===== 섹션 타이틀 ===== */

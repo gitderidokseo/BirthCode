@@ -312,7 +312,8 @@ window.openHistoryModal = function (index) {
                 <span class="modal-pillar-label">년주</span>
                 <span class="modal-pillar-value">${item.yearPillar?.split(' ')[0] || '--'}</span>
             </div>
-        </div>`;
+        </div>
+        <button class="btn-success-small" onclick="copyHistory(${index})" style="margin-bottom: 16px; width: 100%;">📋 명식 및 AI 결과 복사하기</button>`;
 
     if (item.aiResult) {
         html += `<h4 style="color: var(--ai-color); margin: 14px 0 10px;">🤖 AI 분석 결과</h4>`;
@@ -343,6 +344,46 @@ window.openHistoryModal = function (index) {
 
 window.closeHistoryModal = function () {
     document.getElementById('history-modal').classList.add('hidden');
+};
+
+window.copyHistory = function (index) {
+    const history = getHistory();
+    const item = history[index];
+    if (!item) return;
+
+    let textToCopy = `[사주 이력 정보]
+--------------------------------------------------
+조회일: ${formatDate(item.timestamp)}
+생일: ${item.birthDate} (${item.gender || ''})
+--------------------------------------------------
+시주   |   일주   |   월주   |   년주
+${item.hourPillar?.split(' ')[0] || '--'} | ${item.dayPillar?.split(' ')[0] || '--'} | ${item.monthPillar?.split(' ')[0] || '--'} | ${item.yearPillar?.split(' ')[0] || '--'}
+--------------------------------------------------
+`;
+
+    if (item.aiResult) {
+        textToCopy += `\n[AI 상세 풀이 결과]\n`;
+        const sections = [
+            { title: '🌟 전체운', content: item.aiResult.overall },
+            { title: '👪 부모운', content: item.aiResult.parent },
+            { title: '💍 배우자운', content: item.aiResult.marriage },
+            { title: '👶 자녀운', content: item.aiResult.child },
+            { title: '💰 재물운', content: item.aiResult.money },
+            { title: '👴 노년운', content: item.aiResult.laterLife }
+        ];
+        sections.forEach(sec => {
+            if (sec.content) {
+                textToCopy += `\n${sec.title}\n${sec.content}\n`;
+            }
+        });
+    }
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('이력 내용이 복사되었습니다.');
+    }).catch(err => {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다.');
+    });
 };
 
 function renderHistory() {
