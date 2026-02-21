@@ -1,20 +1,63 @@
 import { calculateSaju } from './manseryeok.js';
 import { interpretSaju } from './interpretation.js';
+import translations from './translations.js';
 
 // ===== 전역 상태 =====
 let currentSajuData = null; // 현재 계산된 사주 데이터
+let currentLang = 'ko'; // 기본 언어
 
 // ===== 로컬 스토리지 키 =====
 const HISTORY_KEY = 'saju_history';
 const COMMENTS_KEY = 'saju_comments';
 
+// ===== 초기화 =====
+document.addEventListener('DOMContentLoaded', () => {
+    initLanguage();
+});
+
+function initLanguage() {
+    // navigator.language에서 언어 코드 추출 (예: 'ko-KR' -> 'ko')
+    const userLang = (navigator.language || 'ko').split('-')[0];
+    currentLang = translations[userLang] ? userLang : 'ko';
+
+    // UI 번역 적용
+    applyTranslations();
+}
+
+function applyTranslations() {
+    const t = translations[currentLang];
+
+    // data-i18n 속성을 가진 모든 요소 번역
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) {
+            el.innerHTML = t[key];
+        }
+    });
+
+    // placeholder 번역
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t[key]) {
+            el.placeholder = t[key];
+        }
+    });
+}
+
+function getT() {
+    return translations[currentLang];
+}
+
 // ===== 탭 전환 =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const tabId = btn.dataset.tab;
+        const t = getT();
+
         // 모든 탭 비활성화
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
         // 선택한 탭 활성화
         btn.classList.add('active');
         document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -29,13 +72,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ===== 사주 계산 =====
 document.getElementById('calculate-btn').addEventListener('click', () => {
     try {
+        const t = getT();
         const dateInput = document.getElementById('birth-date').value;
         let timeInput = document.getElementById('birth-time').value;
         const longitudeInput = document.getElementById('longitude').value;
         const gender = document.querySelector('input[name="gender"]:checked').value;
 
         if (!dateInput) {
-            alert('생년월일을 입력해주세요.');
+            alert(t.alert_no_date);
             return;
         }
 
@@ -47,7 +91,7 @@ document.getElementById('calculate-btn').addEventListener('click', () => {
         const longitude = parseFloat(longitudeInput);
 
         if (isNaN(longitude)) {
-            alert('경도를 올바르게 입력해주세요.');
+            alert(t.alert_invalid_longitude);
             return;
         }
 
@@ -62,16 +106,16 @@ document.getElementById('calculate-btn').addEventListener('click', () => {
         document.getElementById('day-pillar').textContent = `${saju.dayPillar} (${saju.dayPillarHanja})`;
         document.getElementById('hour-pillar').textContent = `${saju.hourPillar} (${saju.hourPillarHanja})`;
 
-        let details = `양력 생일: ${year}년 ${month}월 ${day}일 ${hour}시 ${minute}분<br>`;
-        details += `성별: ${gender === 'm' ? '남성' : '여성'}<br>`;
-        details += `출생지 경도: ${longitude}°`;
+        let details = `${t.solar_bday} ${year}-${month}-${day} ${hour}:${minute}<br>`;
+        details += `${t.gender_label} ${gender === 'm' ? t.gender_m : t.gender_f}<br>`;
+        details += `${t.longitude_label} ${longitude}°`;
         if (saju.isTimeCorrected && saju.correctedTime) {
-            details += `<br>(진태양시 보정: ${saju.correctedTime.hour}시 ${saju.correctedTime.minute}분)`;
+            details += `<br>${t.time_correction} ${saju.correctedTime.hour}:${saju.correctedTime.minute})`;
         }
 
         document.getElementById('details').innerHTML = details;
 
-        const interpretation = interpretSaju(saju);
+        const interpretation = interpretSaju(saju, currentLang);
         document.getElementById('interpretation').innerHTML = interpretation;
 
         // 결과 표시 (AI 결과 초기화)
@@ -95,12 +139,14 @@ document.getElementById('calculate-btn').addEventListener('click', () => {
 
     } catch (e) {
         console.error(e);
-        alert('오류가 발생했습니다: ' + e.message);
+        const t = getT();
+        alert(t.alert_error + e.message);
     }
 });
 
 // ===== 복사 버튼 =====
 document.getElementById('copy-btn').addEventListener('click', () => {
+    const t = getT();
     const yearPillar = document.getElementById('year-pillar').textContent;
     const monthPillar = document.getElementById('month-pillar').textContent;
     const dayPillar = document.getElementById('day-pillar').textContent;
@@ -109,38 +155,22 @@ document.getElementById('copy-btn').addEventListener('click', () => {
     const detailsHtml = document.getElementById('details').innerHTML;
     const detailsText = detailsHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
 
-    const interpretationText = document.getElementById('interpretation').innerText;
-
-    const textToCopy = `[사주 명식 정보]
+    const textToCopy = `${t.copy_prefix}
 --------------------------------------------------
-시주   |   일주   |   월주   |   년주
+${t.pillar_hour}   |   ${t.pillar_day}   |   ${t.pillar_month}   |   ${t.pillar_year}
 ${hourPillar} | ${dayPillar} | ${monthPillar} | ${yearPillar}
 --------------------------------------------------
 
 ${detailsText}
 
 --------------------------------------------------
-[AI 사주 분석 요청 프롬프트]
-※ 아래 내용을 복사하여 AI(ChatGPT, Claude 등)에게 붙여넣으면 상세한 사주 풀이를 받을 수 있습니다.
+${t.copy_prompt_title}
+${t.copy_prompt_desc}
 
-"위의 사주 명식 정보를 바탕으로 저의 사주를 상세하게 풀이해주세요.
-명리학적 이론(음양오행의 조화, 십성, 격국, 용신 등)을 근거로 분석하되, 이해하기 쉽게 설명 부탁드립니다.
-
-다음 8가지 항목으로 목차를 나누어 구체적으로 답변해주세요:
-
-1. 🧠 성격 (타고난 기질, 장단점, 내면 심리)
-2. 👶 출생 및 초년운 (성장 과정, 학업운)
-3. 👪 부모운 (부모님과의 유대 관계, 덕)
-4. 💘 연애운 (연애 스타일, 나에게 맞는 이성상)
-5. 💍 배우자운 (결혼 시기, 배우자의 특징 및 능력)
-6. 👨‍👩‍👧‍👦 자녀운 (자녀와의 관계, 자녀의 특징)
-7. 💰 재물운 (직업 적성, 정재/편재운, 부자 가능성)
-8. 👴 노년운 (건강, 은퇴 후의 삶)
-
-마지막으로, 제 사주에서 부족한 기운을 보완할 수 있는 현대적인 개운법(행운의 색, 숫자, 취미 등)도 조언해주세요."`;
+${t.copy_prompt_main}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('AI 분석용 프롬프트가 포함된 사주 정보가 복사되었습니다.\nChatGPT나 Claude 등에 붙여넣어 보세요!');
+        alert(t.alert_copy_success);
     }).catch(() => {
         const textArea = document.createElement("textarea");
         textArea.value = textToCopy;
@@ -150,9 +180,9 @@ ${detailsText}
         textArea.select();
         try {
             document.execCommand('copy');
-            alert('결과가 복사되었습니다.');
+            alert('Copied!');
         } catch (err) {
-            alert('복사에 실패했습니다.');
+            alert('Failed to copy.');
         }
         document.body.removeChild(textArea);
     });
@@ -160,11 +190,26 @@ ${detailsText}
 
 // ===== AI 상세 풀이 요청 =====
 document.getElementById('ai-btn').addEventListener('click', async () => {
+    const t = getT();
     if (!currentSajuData) {
-        alert('먼저 사주를 계산해주세요.');
+        alert(t.alert_need_calc);
         return;
     }
 
+    // Android 앱 내 결제 요청
+    if (typeof Android !== 'undefined' && Android.startPayment) {
+        Android.startPayment();
+    } else {
+        // 앱 환경이 아닐 경우 (브라우저 테스트용)
+        if (confirm(t.alert_confirm_payment)) {
+            onPaymentSuccess();
+        }
+    }
+});
+
+// 결제 성공 시 호출되는 함수 (Android native에서 호출)
+window.onPaymentSuccess = async function () {
+    const t = getT();
     const aiResultDiv = document.getElementById('ai-result');
     const aiLoadingDiv = document.getElementById('ai-loading');
     const aiContentDiv = document.getElementById('ai-content');
@@ -186,7 +231,7 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
 
     // 사주 명식 정보 구성
     const birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    const language = navigator.language || 'ko';
+    const language = currentLang === 'ko' ? 'ko' : 'en'; // 서버는 현재 한국어/영어만 주로 대응
 
     try {
         // Firebase Functions 호출
@@ -204,7 +249,7 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
         );
 
         if (!response.ok) {
-            throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
+            throw new Error(`Server Error: ${response.status}`);
         }
 
         const data = await response.json();
@@ -213,12 +258,12 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
         aiLoadingDiv.classList.add('hidden');
 
         const sections = [
-            { key: 'overall', title: '🌟 전체운', content: data.overall },
-            { key: 'parent', title: '👪 부모운', content: data.parent },
-            { key: 'marriage', title: '💍 배우자운', content: data.marriage },
-            { key: 'child', title: '👶 자녀운', content: data.child },
-            { key: 'money', title: '💰 재물운', content: data.money },
-            { key: 'laterLife', title: '👴 노년운', content: data.laterLife }
+            { key: 'overall', title: t.ai_section_overall, content: data.overall },
+            { key: 'parent', title: t.ai_section_parent, content: data.parent },
+            { key: 'marriage', title: t.ai_section_marriage, content: data.marriage },
+            { key: 'child', title: t.ai_section_child, content: data.child },
+            { key: 'money', title: t.ai_section_money, content: data.money },
+            { key: 'laterLife', title: t.ai_section_later, content: data.laterLife }
         ];
 
         let html = '';
@@ -236,22 +281,22 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
 
         // 이력에 AI 결과 저장
         saveHistory({
-            birthDate: `${year}년 ${month}월 ${day}일 ${hour}시`,
-            gender: gender === 'm' ? '남성' : '여성',
+            birthDate: `${year}-${month}-${day} ${hour}:${minute}`,
+            gender: gender === 'm' ? t.gender_m : t.gender_f,
             yearPillar, monthPillar, dayPillar, hourPillar,
             aiResult: data,
             timestamp: Date.now()
         });
 
     } catch (err) {
-        console.error('AI 요청 실패:', err);
+        console.error('AI Request Failed:', err);
         aiLoadingDiv.classList.add('hidden');
         aiErrorDiv.classList.remove('hidden');
-        aiErrorDiv.textContent = `AI 분석 중 오류가 발생했습니다.\n${err.message}`;
+        aiErrorDiv.textContent = `Error: ${err.message}`;
     } finally {
         aiBtn.disabled = false;
     }
-});
+};
 
 // ===== 이력 관리 =====
 function getHistory() {
@@ -271,7 +316,8 @@ function saveHistory(entry) {
 }
 
 window.clearHistory = function () {
-    if (confirm('이력을 모두 삭제하시겠습니까?')) {
+    const t = getT();
+    if (confirm(t.alert_confirm_clear_history)) {
         localStorage.removeItem(HISTORY_KEY);
         renderHistory();
     }
@@ -285,6 +331,7 @@ window.deleteHistoryItem = function (index) {
 };
 
 window.openHistoryModal = function (index) {
+    const t = getT();
     const history = getHistory();
     const item = history[index];
     if (!item) return;
@@ -294,36 +341,36 @@ window.openHistoryModal = function (index) {
 
     let html = `
         <h3 style="color: var(--primary); margin-bottom: 12px;">📅 ${item.birthDate} (${item.gender || ''})</h3>
-        <p style="font-size:12px; color: var(--text-secondary); margin-bottom: 14px;">조회: ${formatDate(item.timestamp)}</p>
+        <p style="font-size:12px; color: var(--text-secondary); margin-bottom: 14px;">${formatDate(item.timestamp)}</p>
         <div class="modal-pillar-row">
             <div class="modal-pillar">
-                <span class="modal-pillar-label">시주</span>
+                <span class="modal-pillar-label">${t.pillar_hour}</span>
                 <span class="modal-pillar-value">${item.hourPillar?.split(' ')[0] || '--'}</span>
             </div>
             <div class="modal-pillar">
-                <span class="modal-pillar-label">일주</span>
+                <span class="modal-pillar-label">${t.pillar_day}</span>
                 <span class="modal-pillar-value">${item.dayPillar?.split(' ')[0] || '--'}</span>
             </div>
             <div class="modal-pillar">
-                <span class="modal-pillar-label">월주</span>
+                <span class="modal-pillar-label">${t.pillar_month}</span>
                 <span class="modal-pillar-value">${item.monthPillar?.split(' ')[0] || '--'}</span>
             </div>
             <div class="modal-pillar">
-                <span class="modal-pillar-label">년주</span>
+                <span class="modal-pillar-label">${t.pillar_year}</span>
                 <span class="modal-pillar-value">${item.yearPillar?.split(' ')[0] || '--'}</span>
             </div>
         </div>
-        <button class="btn-success-small" onclick="copyHistory(${index})" style="margin-bottom: 16px; width: 100%;">📋 명식 및 AI 결과 복사하기</button>`;
+        <button class="btn-success-small" onclick="copyHistory(${index})" style="margin-bottom: 16px; width: 100%;">${t.btn_copy_short}</button>`;
 
     if (item.aiResult) {
-        html += `<h4 style="color: var(--ai-color); margin: 14px 0 10px;">🤖 AI 분석 결과</h4>`;
+        html += `<h4 style="color: var(--ai-color); margin: 14px 0 10px;">🤖 ${t.ai_badge}</h4>`;
         const sections = [
-            { title: '🌟 전체운', content: item.aiResult.overall },
-            { title: '👪 부모운', content: item.aiResult.parent },
-            { title: '💍 배우자운', content: item.aiResult.marriage },
-            { title: '👶 자녀운', content: item.aiResult.child },
-            { title: '💰 재물운', content: item.aiResult.money },
-            { title: '👴 노년운', content: item.aiResult.laterLife }
+            { title: t.ai_section_overall, content: item.aiResult.overall },
+            { title: t.ai_section_parent, content: item.aiResult.parent },
+            { title: t.ai_section_marriage, content: item.aiResult.marriage },
+            { title: t.ai_section_child, content: item.aiResult.child },
+            { title: t.ai_section_money, content: item.aiResult.money },
+            { title: t.ai_section_later, content: item.aiResult.laterLife }
         ];
         sections.forEach(sec => {
             if (sec.content) {
@@ -335,7 +382,7 @@ window.openHistoryModal = function (index) {
             }
         });
     } else {
-        html += `<p style="color: var(--text-secondary); font-size: 14px; margin-top: 14px; text-align: center;">AI 분석 결과가 없습니다.</p>`;
+        html += `<p style="color: var(--text-secondary); font-size: 14px; margin-top: 14px; text-align: center;">${t.ai_result_none}</p>`;
     }
 
     modalBody.innerHTML = html;
@@ -347,29 +394,30 @@ window.closeHistoryModal = function () {
 };
 
 window.copyHistory = function (index) {
+    const t = getT();
     const history = getHistory();
     const item = history[index];
     if (!item) return;
 
-    let textToCopy = `[사주 이력 정보]
+    let textToCopy = `${t.copy_prefix}
 --------------------------------------------------
-조회일: ${formatDate(item.timestamp)}
-생일: ${item.birthDate} (${item.gender || ''})
+ID: ${formatDate(item.timestamp)}
+BD: ${item.birthDate} (${item.gender || ''})
 --------------------------------------------------
-시주   |   일주   |   월주   |   년주
+${t.pillar_hour}   |   ${t.pillar_day}   |   ${t.pillar_month}   |   ${t.pillar_year}
 ${item.hourPillar?.split(' ')[0] || '--'} | ${item.dayPillar?.split(' ')[0] || '--'} | ${item.monthPillar?.split(' ')[0] || '--'} | ${item.yearPillar?.split(' ')[0] || '--'}
 --------------------------------------------------
 `;
 
     if (item.aiResult) {
-        textToCopy += `\n[AI 상세 풀이 결과]\n`;
+        textToCopy += `\n[${t.ai_badge}]\n`;
         const sections = [
-            { title: '🌟 전체운', content: item.aiResult.overall },
-            { title: '👪 부모운', content: item.aiResult.parent },
-            { title: '💍 배우자운', content: item.aiResult.marriage },
-            { title: '👶 자녀운', content: item.aiResult.child },
-            { title: '💰 재물운', content: item.aiResult.money },
-            { title: '👴 노년운', content: item.aiResult.laterLife }
+            { title: t.ai_section_overall, content: item.aiResult.overall },
+            { title: t.ai_section_parent, content: item.aiResult.parent },
+            { title: t.ai_section_marriage, content: item.aiResult.marriage },
+            { title: t.ai_section_child, content: item.aiResult.child },
+            { title: t.ai_section_money, content: item.aiResult.money },
+            { title: t.ai_section_later, content: item.aiResult.laterLife }
         ];
         sections.forEach(sec => {
             if (sec.content) {
@@ -379,22 +427,22 @@ ${item.hourPillar?.split(' ')[0] || '--'} | ${item.dayPillar?.split(' ')[0] || '
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('이력 내용이 복사되었습니다.');
+        alert(t.alert_copy_success);
     }).catch(err => {
-        console.error('복사 실패:', err);
-        alert('복사에 실패했습니다.');
+        console.error('Copy Failed:', err);
     });
 };
 
 function renderHistory() {
     const list = document.getElementById('history-list');
     const history = getHistory();
+    const t = getT();
 
     if (history.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
                 <p>🔮</p>
-                <p>아직 조회한 사주가 없습니다.<br>'사주보기' 탭에서 사주를 조회해보세요!</p>
+                <p>${t.history_empty}</p>
             </div>`;
         return;
     }
@@ -411,10 +459,10 @@ function renderHistory() {
                 <button class="history-delete-btn" onclick="event.stopPropagation(); deleteHistoryItem(${index})">🗑</button>
             </div>
             <div class="history-item-pillars">
-                시주 ${item.hourPillar?.split(' ')[0] || '--'} / 
-                일주 ${item.dayPillar?.split(' ')[0] || '--'} / 
-                월주 ${item.monthPillar?.split(' ')[0] || '--'} / 
-                년주 ${item.yearPillar?.split(' ')[0] || '--'}
+                ${t.pillar_hour} ${item.hourPillar?.split(' ')[0] || '--'} / 
+                ${t.pillar_day} ${item.dayPillar?.split(' ')[0] || '--'} / 
+                ${t.pillar_month} ${item.monthPillar?.split(' ')[0] || '--'} / 
+                ${t.pillar_year} ${item.yearPillar?.split(' ')[0] || '--'}
             </div>
         </div>`;
     });
@@ -440,13 +488,14 @@ if (commentTextarea) {
 }
 
 window.submitComment = function () {
+    const t = getT();
     const nameInput = document.getElementById('comment-name');
     const textInput = document.getElementById('comment-text');
-    const name = nameInput.value.trim() || '익명';
+    const name = nameInput.value.trim() || 'Anonymous';
     const text = textInput.value.trim();
 
     if (!text) {
-        alert('댓글 내용을 입력해주세요.');
+        alert('Check input');
         return;
     }
 
@@ -469,7 +518,8 @@ window.submitComment = function () {
 };
 
 window.deleteComment = function (id) {
-    if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+    const t = getT();
+    if (!confirm(t.alert_confirm_delete_comment)) return;
     let comments = getComments();
     comments = comments.filter(c => c.id !== id);
     localStorage.setItem(COMMENTS_KEY, JSON.stringify(comments));
@@ -479,12 +529,13 @@ window.deleteComment = function (id) {
 function renderComments() {
     const list = document.getElementById('comments-list');
     const comments = getComments();
+    const t = getT();
 
     if (comments.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
                 <p>💬</p>
-                <p>아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</p>
+                <p>${t.comments_empty}</p>
             </div>`;
         return;
     }
@@ -497,7 +548,7 @@ function renderComments() {
                 <span class="comment-author">${escapeHtml(comment.name)}</span>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span class="comment-time">${formatDate(comment.timestamp)}</span>
-                    <button class="comment-delete-btn" onclick="deleteComment(${comment.id})">삭제</button>
+                    <button class="comment-delete-btn" onclick="deleteComment(${comment.id})">${t.btn_delete}</button>
                 </div>
             </div>
             <div class="comment-text">${escapeHtml(comment.text).replace(/\n/g, '<br>')}</div>

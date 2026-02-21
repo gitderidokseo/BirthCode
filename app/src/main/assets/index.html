@@ -4,75 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>만세력 사주팔자</title>
+    <title data-i18n="app_title">출생코드</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <!-- 상단 앱바 -->
     <div class="app-bar">
-        <span class="app-bar-title">🔮 만세력 사주팔자</span>
+        <span class="app-bar-title" id="app-bar-title">🔮 <span data-i18n="app_title">출생코드</span></span>
     </div>
 
     <!-- 탭 네비게이션 -->
     <div class="tab-bar">
-        <button class="tab-btn active" data-tab="saju">사주보기</button>
-        <button class="tab-btn" data-tab="guide">사주 안내</button>
-        <button class="tab-btn" data-tab="history">이력</button>
-        <button class="tab-btn" data-tab="comments">댓글</button>
+        <button class="tab-btn active" data-tab="saju" data-i18n="tab_saju">사주보기</button>
+        <button class="tab-btn" data-tab="guide" data-i18n="tab_guide">사주 안내</button>
+        <button class="tab-btn" data-tab="history" data-i18n="tab_history">이력</button>
+        <button class="tab-btn" data-tab="comments" data-i18n="tab_comments">댓글</button>
     </div>
 
     <!-- ===== 탭 1: 사주보기 ===== -->
     <div id="tab-saju" class="tab-content active">
         <div class="container">
             <div class="input-group">
-                <label for="birth-date">생년월일 <span class="solar-notice">(양력)</span></label>
+                <label for="birth-date"><span data-i18n="label_birth_date">생년월일</span> <span class="solar-notice"
+                        data-i18n="solar_notice">(양력)</span></label>
                 <input type="date" id="birth-date" required>
             </div>
             <div class="input-group">
-                <label for="birth-time">태어난 시간</label>
+                <label for="birth-time" data-i18n="label_birth_time">태어난 시간</label>
                 <input type="time" id="birth-time">
-                <small class="hint">* 시간을 모르면 비워두세요 (00:00으로 처리)</small>
+                <small class="hint" data-i18n="time_hint">* 시간을 모르면 비워두세요 (00:00으로 처리)</small>
             </div>
             <div class="input-group">
-                <label>성별</label>
+                <label data-i18n="label_gender">성별</label>
                 <div class="gender-options">
                     <label class="radio-label">
                         <input type="radio" name="gender" value="m" checked>
-                        <span>남성</span>
+                        <span data-i18n="gender_m">남성</span>
                     </label>
                     <label class="radio-label">
                         <input type="radio" name="gender" value="f">
-                        <span>여성</span>
+                        <span data-i18n="gender_f">여성</span>
                     </label>
                 </div>
             </div>
             <div class="input-group">
-                <label for="longitude">출생지 경도</label>
+                <label for="longitude" data-i18n="label_longitude">출생지 경도</label>
                 <input type="number" id="longitude" step="0.1" value="127.0" placeholder="예: 127.0">
-                <small class="hint">서울: 127.0 / 부산: 129.0 / 제주: 126.5</small>
+                <small class="hint" data-i18n="longitude_hint">서울: 127.0 / 부산: 129.0 / 제주: 126.5</small>
             </div>
-            <button id="calculate-btn" class="btn-primary">🔮 팔자 보기</button>
+            <button id="calculate-btn" class="btn-primary" data-i18n="btn_calculate">🔮 팔자 보기</button>
 
             <div id="result" class="hidden">
                 <div class="result-header">
-                    <h2>✨ 당신의 사주</h2>
+                    <h2 data-i18n="result_title">✨ 당신의 출생코드</h2>
                 </div>
                 <div class="pillars">
                     <div class="pillar">
-                        <span class="pillar-label">시주</span>
+                        <span class="pillar-label" data-i18n="pillar_hour">시주</span>
                         <span class="pillar-content" id="hour-pillar">--</span>
                     </div>
                     <div class="pillar">
-                        <span class="pillar-label">일주</span>
+                        <span class="pillar-label" data-i18n="pillar_day">일주</span>
                         <span class="pillar-content" id="day-pillar">--</span>
                     </div>
                     <div class="pillar">
-                        <span class="pillar-label">월주</span>
+                        <span class="pillar-label" data-i18n="pillar_month">월주</span>
                         <span class="pillar-content" id="month-pillar">--</span>
                     </div>
                     <div class="pillar">
-                        <span class="pillar-label">년주</span>
+                        <span class="pillar-label" data-i18n="pillar_year">년주</span>
                         <span class="pillar-content" id="year-pillar">--</span>
                     </div>
                 </div>
@@ -80,27 +81,27 @@
                 <div id="interpretation" class="interpretation-box"></div>
 
                 <!-- 복사 버튼 -->
-                <button id="copy-btn" class="btn-success">📋 결과 텍스트로 복사</button>
+                <button id="copy-btn" class="btn-success" data-i18n="btn_copy">📋 결과 텍스트로 복사</button>
 
                 <!-- 복사 안내글 -->
-                <div class="copy-notice">
+                <div class="copy-notice" data-i18n="copy_notice">
                     이 글을 복사해서 <br>
                     GPT, 제미나이, 클로드에게 상세 풀이 요청해보세요.<br>
                     또는, 아래 버튼을 눌러 요청하셔도 됩니다.
                 </div>
 
                 <!-- AI 상세 풀이 요청 버튼 -->
-                <button id="ai-btn" class="btn-ai">🤖 AI에게 상세 풀이 요청(유료)</button>
+                <button id="ai-btn" class="btn-ai" data-i18n="btn_ai">🤖 AI에게 상세 풀이 요청(유료)</button>
 
                 <!-- AI 결과 영역 -->
                 <div id="ai-result" class="hidden">
                     <div class="ai-result-header">
-                        <span class="ai-badge">AI 분석</span>
-                        <h3>🤖 AI 상세 풀이</h3>
+                        <span class="ai-badge" data-i18n="ai_badge">AI 분석</span>
+                        <h3 data-i18n="ai_result_title">🤖 출생코드 AI 상세 풀이</h3>
                     </div>
                     <div id="ai-loading" class="hidden">
                         <div class="loading-spinner"></div>
-                        <p class="loading-text">AI가 사주를 분석하고 있습니다...<br>잠시만 기다려주세요.</p>
+                        <p class="loading-text" data-i18n="ai_loading">AI가 사주를 분석하고 있습니다...<br>잠시만 기다려주세요.</p>
                     </div>
                     <div id="ai-error" class="hidden error-box"></div>
                     <div id="ai-content" class="ai-content-box"></div>
@@ -112,74 +113,82 @@
     <!-- ===== 탭 2: 사주 안내 ===== -->
     <div id="tab-guide" class="tab-content hidden">
         <div class="container">
-            <h2 class="section-title">📖 사주팔자란?</h2>
+            <h2 class="section-title" data-i18n="guide_title">📖 출생코드란?</h2>
 
             <div class="guide-card">
-                <h3>🌟 사주팔자의 의미</h3>
-                <p>사주팔자(四柱八字)는 한 사람이 태어난 년(年), 월(月), 일(日), 시(時)의 네 기둥(四柱)을 천간(天干)과 지지(地支)로 표현한 여덟 글자(八字)를 의미합니다.</p>
-                <p>이를 통해 그 사람의 타고난 기운과 성격, 운명의 흐름 등을 파악할 수 있다고 전해집니다.</p>
+                <h3 data-i18n="guide_meaning_title">🌟 출생코드의 의미</h3>
+                <p data-i18n="guide_meaning_1">사주팔자(四柱八字)는 한 사람이 태어난 년(年), 월(月), 일(日), 시(時)의 네 기둥(四柱)을 천간(天干)과 지지(地支)로
+                    표현한 여덟 글자(八字)를 의미합니다.</p>
+                <p data-i18n="guide_meaning_2">출생코드는 한 사람이 태어난 년(年), 월(月), 일(日), 시(時)에 숨겨진 여덟 글자의 정보를 통해 나의 기운과 성격을 파악하는
+                    현대적인 해석 방식입니다.</p>
             </div>
 
             <div class="guide-card">
-                <h3>🏛️ 사주팔자의 구성</h3>
+                <h3 data-i18n="guide_structure_title">🏛️ 사주팔자의 구성</h3>
                 <div class="pillar-guide">
                     <div class="pillar-guide-item">
                         <span class="pillar-icon">年</span>
                         <div>
-                            <strong>년주(年柱)</strong>
-                            <p>출생 연도 - 조상과 부모의 영향, 어린 시절의 환경</p>
+                            <strong data-i18n="pillar_year">년주(年柱)</strong>
+                            <p data-i18n="pillar_year_desc">출생 연도 - 조상과 부모의 영향, 어린 시절의 환경</p>
                         </div>
                     </div>
                     <div class="pillar-guide-item">
                         <span class="pillar-icon">月</span>
                         <div>
-                            <strong>월주(月柱)</strong>
-                            <p>출생 월 - 부모와 형제의 관계, 청년기의 삶</p>
+                            <strong data-i18n="pillar_month">월주(月柱)</strong>
+                            <p data-i18n="pillar_month_desc">출생 월 - 부모와 형제의 관계, 청년기의 삶</p>
                         </div>
                     </div>
                     <div class="pillar-guide-item">
                         <span class="pillar-icon">日</span>
                         <div>
-                            <strong>일주(日柱)</strong>
-                            <p>출생 일 - 본인과 배우자의 관계, 중년기의 삶</p>
+                            <strong data-i18n="pillar_day">일주(日柱)</strong>
+                            <p data-i18n="pillar_day_desc">출생 일 - 본인과 배우자의 관계, 중년기의 삶</p>
                         </div>
                     </div>
                     <div class="pillar-guide-item">
                         <span class="pillar-icon">時</span>
                         <div>
-                            <strong>시주(時柱)</strong>
-                            <p>출생 시간 - 자녀와 말년의 운, 노년기의 삶</p>
+                            <strong data-i18n="pillar_hour">시주(時柱)</strong>
+                            <p data-i18n="pillar_hour_desc">출생 시간 - 자녀와 말년의 운, 노년기의 삶</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="guide-card">
-                <h3>☯️ 음양오행</h3>
+                <h3 data-i18n="guide_elements_title">☯️ 음양오행</h3>
                 <div class="elements-grid">
-                    <div class="element-item element-wood">🌳 목(木)<br><small>봄・동쪽・성장</small></div>
-                    <div class="element-item element-fire">🔥 화(火)<br><small>여름・남쪽・열정</small></div>
-                    <div class="element-item element-earth">🏔️ 토(土)<br><small>환절기・중앙・신용</small></div>
-                    <div class="element-item element-metal">⚔️ 금(金)<br><small>가을・서쪽・의리</small></div>
-                    <div class="element-item element-water">🌊 수(水)<br><small>겨울・북쪽・지혜</small></div>
+                    <div class="element-item element-wood" data-i18n="element_wood">🌳 목(木)<br><small>봄・동쪽・성장</small>
+                    </div>
+                    <div class="element-item element-fire" data-i18n="element_fire">🔥 화(火)<br><small>여름・남쪽・열정</small>
+                    </div>
+                    <div class="element-item element-earth" data-i18n="element_earth">🏔️
+                        토(土)<br><small>환절기・중앙・신용</small></div>
+                    <div class="element-item element-metal" data-i18n="element_metal">⚔️ 금(金)<br><small>가을・서쪽・의리</small>
+                    </div>
+                    <div class="element-item element-water" data-i18n="element_water">🌊 수(水)<br><small>겨울・북쪽・지혜</small>
+                    </div>
                 </div>
             </div>
 
             <div class="guide-card">
-                <h3>📱 사용 방법</h3>
+                <h3 data-i18n="usage_title">📱 사용 방법</h3>
                 <ol class="usage-list">
-                    <li><strong>사주보기</strong> 탭에서 생년월일과 시간을 입력합니다</li>
-                    <li>출생지의 경도를 입력합니다 (기본값: 서울 127.0)</li>
-                    <li><strong>팔자 보기</strong> 버튼을 누르면 만세력으로 사주를 계산합니다</li>
-                    <li>결과 아래 <strong>복사하기</strong>로 클립보드에 복사할 수 있습니다</li>
-                    <li><strong>AI에게 상세 풀이 요청</strong> 버튼으로 AI의 심층 분석을 받을 수 있습니다</li>
-                    <li><strong>이력</strong> 탭에서 이전 조회 내역을 확인할 수 있습니다</li>
+                    <li data-i18n="usage_1"><strong>사주보기</strong> 탭에서 생년월일과 시간을 입력합니다</li>
+                    <li data-i18n="usage_2">출생지의 경도를 입력합니다 (기본값: 서울 127.0)</li>
+                    <li data-i18n="usage_3"><strong>팔자 보기</strong> 버튼을 누르면 당신의 출생코드로 사주를 계산합니다</li>
+                    <li data-i18n="usage_4">결과 아래 <strong>복사하기</strong>로 클립보드에 복사할 수 있습니다</li>
+                    <li data-i18n="usage_5"><strong>AI에게 상세 풀이 요청</strong> 버튼으로 AI의 심층 분석을 받을 수 있습니다</li>
+                    <li data-i18n="usage_6"><strong>이력</strong> 탭에서 이전 조회 내역을 확인할 수 있습니다</li>
                 </ol>
             </div>
 
             <div class="guide-card warning-card">
-                <h3>⚠️ 주의사항</h3>
-                <p>본 앱의 사주 분석 결과는 전통 명리학과 AI를 활용한 <strong>참고용 정보</strong>입니다. 중요한 결정에 있어서는 전문 명리학자와 상담하시기 바랍니다.</p>
+                <h3 data-i18n="caution_title">⚠️ 주의사항</h3>
+                <p data-i18n="caution_desc">본 앱의 사주 분석 결과는 전통 명리학과 AI를 활용한 <strong>참고용 정보</strong>입니다. 중요한 결정에 있어서는 전문
+                    명리학자와 상담하시기 바랍니다.</p>
             </div>
         </div>
     </div>
@@ -188,14 +197,11 @@
     <div id="tab-history" class="tab-content hidden">
         <div class="container">
             <div class="history-header">
-                <h2 class="section-title">📋 조회 이력</h2>
-                <button id="clear-history-btn" class="btn-danger-small" onclick="clearHistory()">전체 삭제</button>
+                <h2 class="section-title" data-i18n="history_title">📋 조회 이력</h2>
+                <button id="clear-history-btn" class="btn-danger-small" onclick="clearHistory()"
+                    data-i18n="btn_clear_all">전체 삭제</button>
             </div>
             <div id="history-list">
-                <div class="empty-state">
-                    <p>🔮</p>
-                    <p>아직 조회한 사주가 없습니다.<br>'사주보기' 탭에서 사주를 조회해보세요!</p>
-                </div>
             </div>
         </div>
     </div>
@@ -212,27 +218,26 @@
     <!-- ===== 탭 4: 댓글 ===== -->
     <div id="tab-comments" class="tab-content hidden">
         <div class="container">
-            <h2 class="section-title">💬 자유 댓글</h2>
-            <p class="comments-desc">사주에 대한 경험이나 의견을 자유롭게 나눠보세요.</p>
+            <h2 class="section-title" data-i18n="comments_title">💬 자유 댓글</h2>
+            <p class="comments-desc" data-i18n="comments_desc">사주에 대한 경험이나 의견을 자유롭게 나눠보세요.</p>
 
             <!-- 댓글 작성 폼 -->
             <div class="comment-form">
                 <div class="input-group">
-                    <input type="text" id="comment-name" placeholder="닉네임 (선택)" maxlength="20">
+                    <input type="text" id="comment-name" placeholder="닉네임 (선택)" maxlength="20"
+                        data-i18n-placeholder="placeholder_nickname">
                 </div>
                 <div class="input-group">
-                    <textarea id="comment-text" placeholder="댓글을 입력하세요..." rows="3" maxlength="500"></textarea>
+                    <textarea id="comment-text" placeholder="댓글을 입력하세요..." rows="3" maxlength="500"
+                        data-i18n-placeholder="placeholder_comment"></textarea>
                     <small class="char-count"><span id="char-count">0</span>/500</small>
                 </div>
-                <button id="submit-comment-btn" class="btn-primary" onclick="submitComment()">💬 댓글 등록</button>
+                <button id="submit-comment-btn" class="btn-primary" onclick="submitComment()"
+                    data-i18n="btn_submit_comment">💬 댓글 등록</button>
             </div>
 
             <!-- 댓글 목록 -->
             <div id="comments-list">
-                <div class="empty-state">
-                    <p>💬</p>
-                    <p>아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</p>
-                </div>
             </div>
         </div>
     </div>

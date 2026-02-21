@@ -1,40 +1,53 @@
-# 빌드 결과물
+# Build artifacts
 build/
 .gradle/
+app/build/
+functions/lib/
+functions/node_modules/
 
-# Android SDK 로컬 설정 (개인 PC마다 경로가 다름)
+# Android SDK local settings
 local.properties
 
-# IntelliJ / Android Studio 설정
-.idea/caches/
-.idea/libraries/
-.idea/modules.xml
-.idea/workspace.xml
-.idea/navEditor.xml
-.idea/assetWizardSettings.xml
-.idea/.gitignore
+# IntelliJ / Android Studio settings
+.idea/
 *.iml
+*.iws
+*.ipr
+out/
 
-# 운영체제 생성 파일
+# Firebase / Functions
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+pubsub-debug.log*
+ui-debug.log*
+functions/.env
+functions/.runtimeconfig.json
+
+# Operating System files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# 서명 키 파일 (절대 커밋 금지)
+# Signing keys (CRITICAL: NEVER COMMIT THESE)
 *.jks
 *.keystore
+keystore/
 keystore.properties
 
-# 프로파일링 / 캡처 파일
+# Profiling / Capture files
 captures/
 *.hprof
 
-# 코드 커버리지 리포트
+# Code coverage reports
 *.exec
 
-# ProGuard 출력
+# Output files
 *.apk
 *.aab
 *.ap_
 
-# 테스트 로그
+# Logs
 lint/
+*.log
+

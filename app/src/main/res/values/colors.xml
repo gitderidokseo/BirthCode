@@ -6,4 +6,7 @@
     <color name="teal_700">#018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="birthcode_primary">#6C63FF</color>
+    <color name="birthcode_secondary">#FF6584</color>
+    <color name="birthcode_bg">#1A1A2E</color>
 </resources>

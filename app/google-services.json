@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "767447901910",
+    "project_id": "birthcode-c3154",
+    "storage_bucket": "birthcode-c3154.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767447901910:android:5828d0cc4870818fc98b77",
+        "android_client_info": {
+          "package_name": "com.doongdallong.birthcode"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeE4T-zN3R7ePhRkoFm9BuLfZBCh5YFKI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
