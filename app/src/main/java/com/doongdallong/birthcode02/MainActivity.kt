@@ -1,4 +1,4 @@
-package com.doongdallong.birthcode
+package com.doongdallong.birthcode02
 
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +18,7 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
@@ -30,9 +31,12 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
     private lateinit var auth: FirebaseAuth
     private var productDetails: ProductDetails? = null
+    private var isConnecting = false
+    private var isQuerying = false
+    private var hasQueried = false
 
     // Product ID (This must match the ID registered in the Play Console)
-    private val SKU_AI_INTERPRETATION = "ai_detailed_analysis"
+    private val SKU_AI_INTERPRETATION = "basic"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,20 +98,40 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             .enablePendingPurchases()
             .build()
 
+        connectToBilling()
+    }
+
+    private fun connectToBilling() {
+        if (isConnecting) return
+        isConnecting = true
+        Log.d("Billing", "Connecting to BillingClient...")
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
+                isConnecting = false
+                Log.d("Billing", "Setup finished: ${billingResult.responseCode}, ${billingResult.debugMessage}")
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     queryProduct()
+                    queryPurchases()
+                } else {
+                    Log.e("Billing", "Billing setup failed: ${billingResult.debugMessage}")
                 }
             }
 
             override fun onBillingServiceDisconnected() {
-                // Try to restart the connection in the next request
+                isConnecting = false
+                Log.d("Billing", "Service disconnected. Retrying connection in 5s...")
+                // Retry with delay to avoid tight loop
+                webView.postDelayed({
+                    connectToBilling()
+                }, 5000)
             }
         })
     }
 
     private fun queryProduct() {
+        if (isQuerying) return
+        isQuerying = true
+        Log.d("Billing", "Querying product details for: $SKU_AI_INTERPRETATION")
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(SKU_AI_INTERPRETATION)
@@ -120,8 +144,34 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             .build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+            isQuerying = false
+            hasQueried = true
+            Log.d("Billing", "Query result: ${billingResult.responseCode}, ${billingResult.debugMessage}")
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                productDetails = productDetailsList.find { it.productId == SKU_AI_INTERPRETATION }
+                if (productDetailsList.isEmpty()) {
+                    Log.e("Billing", "Product details list is empty! Check Product ID ($SKU_AI_INTERPRETATION) in Play Console.")
+                } else {
+                    productDetails = productDetailsList.find { it.productId == SKU_AI_INTERPRETATION }
+                    Log.d("Billing", "Product details found: ${productDetails?.name}")
+                }
+            } else {
+                Log.e("Billing", "Failed to query product details: ${billingResult.debugMessage}")
+            }
+        }
+    }
+
+    private fun queryPurchases() {
+        if (!billingClient.isReady) return
+
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.INAPP)
+            .build()
+
+        billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                for (purchase in purchases) {
+                    handlePurchase(purchase)
+                }
             }
         }
     }
@@ -159,11 +209,28 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     inner class WebAppInterface {
         @JavascriptInterface
         fun startPayment() {
-            if (productDetails == null) {
+            if (!billingClient.isReady) {
+                Log.w("Billing", "BillingClient is not ready. Trying to connect...")
+                connectToBilling()
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, getString(R.string.msg_loading_payment), Toast.LENGTH_SHORT).show()
                 }
-                queryProduct() // Re-query
+                return
+            }
+
+            if (productDetails == null) {
+                if (hasQueried && !isQuerying) {
+                    // Already tried querying and found nothing
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, getString(R.string.msg_product_not_found, SKU_AI_INTERPRETATION), Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Log.w("Billing", "Product details not loaded. Re-querying...")
+                    queryProduct()
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, getString(R.string.msg_loading_payment), Toast.LENGTH_SHORT).show()
+                    }
+                }
                 return
             }
 
@@ -186,6 +253,7 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 .getAppCheckToken(false)
                 .addOnSuccessListener { tokenResult ->
                     val token = tokenResult.token
+                    Log.d("AppCheck", "Successfully got AppCheck token (length: ${token.length})")
                     runOnUiThread {
                         webView.evaluateJavascript("javascript:$callbackName('$token')", null)
                     }
@@ -204,15 +272,18 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             if (user != null) {
                 user.getIdToken(false).addOnSuccessListener { result ->
                     val token = result.token ?: ""
+                    Log.d("Auth", "Successfully got Auth token (length: ${token.length})")
                     runOnUiThread {
                         webView.evaluateJavascript("javascript:$callbackName('$token')", null)
                     }
-                }.addOnFailureListener {
+                }.addOnFailureListener { e ->
+                    Log.e("Auth", "Failed to get Auth token", e)
                     runOnUiThread {
                         webView.evaluateJavascript("javascript:$callbackName('')", null)
                     }
                 }
             } else {
+                Log.w("Auth", "No current user for Auth token")
                 runOnUiThread {
                     webView.evaluateJavascript("javascript:$callbackName('')", null)
                 }

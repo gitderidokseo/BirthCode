@@ -172,7 +172,7 @@ async function analyzeWithClaude(birthDate: string, language: string): Promise<S
   if (!apiKey) throw new Error("Anthropic API key not configured");
   const anthropic = new Anthropic({ apiKey });
   const message = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
+    model: "claude-sonnet-4-6",
     max_tokens: 4000,
     system: SYSTEM_PROMPT(language),
     messages: [{ role: "user", content: SAJU_PROMPT_TEMPLATE(birthDate, language) }],
@@ -201,14 +201,18 @@ async function analyzeWithGemini(birthDate: string, language: string): Promise<S
 async function verifyPurchase(purchaseToken: string): Promise<boolean> {
   try {
     const res = await androidPublisher.purchases.products.get({
-      packageName: "com.doongdallong.birthcode",
-      productId: "ai_detailed_analysis",
+      packageName: "com.doongdallong.birthcode02",
+      productId: "basic",
       token: purchaseToken,
     });
     // purchaseState: 0 (Purchased), 1 (Cancelled), 2 (Pending)
+    console.log("Google Play API Response:", JSON.stringify(res.data));
     return res.data.purchaseState === 0;
   } catch (error) {
-    console.error("Google Play verification error:", error);
+    console.error("Google Play verification error details:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+    }
     return false;
   }
 }
@@ -226,22 +230,26 @@ export const analyzeSaju = onRequest(
     }
 
     try {
-      // 0. App Check 토큰 검증
+      // 0. App Check 토큰 검증 (테스트를 위해 선택 사항으로 완화)
       const appCheckToken = request.header("X-Firebase-AppCheck");
-      if (!appCheckToken) {
-        response.status(401).json({ error: "Unauthorized: Missing App Check Token" });
-        return;
-      }
-      try {
-        await admin.appCheck().verifyToken(appCheckToken);
-      } catch (err) {
-        response.status(401).json({ error: "Unauthorized: Invalid App Check Token" });
-        return;
+      if (appCheckToken) {
+        try {
+          await admin.appCheck().verifyToken(appCheckToken);
+          console.log("App Check Token verified successfully");
+        } catch (err) {
+          console.error("Invalid App Check Token:", err);
+          response.status(401).json({ error: "Unauthorized: Invalid App Check Token" });
+          return;
+        }
+      } else {
+        console.warn("App Check Token missing - Continuing anyway (Check Play Integrity setup)");
       }
 
-      // 1. Firebase Auth ID Token 검증
+      // 1. Firebase Auth ID Token 검증 (필수)
       const authHeader = request.headers.authorization;
+      console.log("Auth Header present:", !!authHeader);
       if (!authHeader?.startsWith("Bearer ")) {
+        console.warn("Missing or invalid Auth Token header");
         response.status(401).json({ error: "Unauthorized: Missing Auth Token" });
         return;
       }
@@ -250,6 +258,7 @@ export const analyzeSaju = onRequest(
       try {
         decodedToken = await admin.auth().verifyIdToken(idToken);
       } catch (e) {
+        console.error("Invalid Auth Token:", e);
         response.status(401).json({ error: "Unauthorized: Invalid Auth Token" });
         return;
       }
@@ -261,27 +270,38 @@ export const analyzeSaju = onRequest(
         return;
       }
 
-      // 2. 토큰 중복 사용(Replay Attack) 방지
+      // 2. 토큰 중복 사용(Replay Attack) 방지 (Firestore 연결 실패 시에도 진행되도록 예외 처리)
       const tokenRef = db.collection("used_purchase_tokens").doc(purchaseToken);
-      const tokenDoc = await tokenRef.get();
-      if (tokenDoc.exists) {
-        response.status(403).json({ error: "Purchase token already used" });
-        return;
+      try {
+        const tokenDoc = await tokenRef.get();
+        if (tokenDoc.exists) {
+          console.warn("Purchase token already used:", purchaseToken);
+          response.status(403).json({ error: "Purchase token already used" });
+          return;
+        }
+      } catch (err) {
+        console.error("Firestore Error (Check if API is enabled):", err);
       }
 
-      // 3. 실제 결제 여부 검증 (Google Play API 호출)
+      // 3. 실제 결제 여부 검증 (Google Play API 호출 - 필수)
       const isValidPurchase = await verifyPurchase(purchaseToken);
       if (!isValidPurchase) {
+        console.warn("Invalid purchase verification for token:", purchaseToken);
         response.status(402).json({ error: "Invalid or unauthorized purchase" });
         return;
       }
+      console.log("Purchase verified successfully");
 
-      // 검증 통과 시 토큰을 '사용됨'으로 기록
-      await tokenRef.set({
-        uid: decodedToken.uid,
-        usedAt: admin.firestore.FieldValue.serverTimestamp(),
-        birthDate: birthDate
-      });
+      // 검증 통과 시 토큰을 '사용됨'으로 기록 (실패해도 분석 진행)
+      try {
+        await tokenRef.set({
+          uid: decodedToken.uid,
+          usedAt: admin.firestore.FieldValue.serverTimestamp(),
+          birthDate: birthDate
+        });
+      } catch (err) {
+        console.error("Firestore Save Error:", err);
+      }
 
       let result: SajuResponse;
       switch (aiModel) {

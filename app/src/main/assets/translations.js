@@ -5,6 +5,7 @@ const translations = {
         tab_guide: "사주 안내",
         tab_history: "이력",
         tab_comments: "댓글",
+        tab_info: "정보",
         label_birth_date: "생년월일",
         solar_notice: "(양력)",
         label_birth_time: "태어난 시간",
@@ -109,7 +110,14 @@ const translations = {
         interpret_missing: "💡 부족한 기운: ",
         interpret_missing_advice: "부족한 기운을 보충하는 색상이나 소품을 활용하거나, 해당 기운이 가진 덕목(예: 목-인자함, 화-예의, 토-신용, 금-의리, 수-지혜)을 의식적으로 기르면 좋습니다.",
         interpret_excessive: "⚠️ 과한 기운: ",
-        interpret_excessive_advice: "특정 기운이 너무 강하면 편중된 성향이 나타날 수 있으니, 조화를 이루도록 노력하는 것이 좋습니다."
+        interpret_excessive_advice: "특정 기운이 너무 강하면 편중된 성향이 나타날 수 있으니, 조화를 이루도록 노력하는 것이 좋습니다.",
+        info_title: "📱 앱 정보",
+        info_copyright_title: "⚖️ 저작권 및 라이선스",
+        info_copyright_content: "본 앱의 사주 계산 기능은 아래 오픈소스 라이브러리를 활용하고 있습니다.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "GitHub 저장소 보기",
+        info_license_title: "📜 라이선스 안내",
+        info_license_content: "이 프로그램은 MIT 라이선스 하에 배포되는 오픈소스 코드를 포함하고 있으며, 해당 라이선스 규정을 준수합니다."
     },
     en: {
         app_title: "BirthCode",
@@ -117,6 +125,7 @@ const translations = {
         tab_guide: "Guide",
         tab_history: "History",
         tab_comments: "Comments",
+        tab_info: "Info",
         label_birth_date: "Birth Date",
         solar_notice: "(Solar)",
         label_birth_time: "Birth Time",
@@ -217,7 +226,14 @@ const translations = {
         interpret_missing: "💡 Missing Energy: ",
         interpret_missing_advice: "It is good to use colors or props that supplement the missing energy, or consciously develop the virtues of that energy.",
         interpret_excessive: "⚠️ Excessive Energy: ",
-        interpret_excessive_advice: "If a certain energy is too strong, balanced efforts are needed to harmonize your personality."
+        interpret_excessive_advice: "If a certain energy is too strong, balanced efforts are needed to harmonize your personality.",
+        info_title: "📱 App Information",
+        info_copyright_title: "⚖️ Copyright & License",
+        info_copyright_content: "The Saju calculation feature of this app uses the following open-source library.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "View GitHub Repository",
+        info_license_title: "📜 License Notice",
+        info_license_content: "This program includes open-source code distributed under the MIT License and complies with the license regulations."
     },
     ja: {
         app_title: "出生コード",
@@ -225,6 +241,7 @@ const translations = {
         tab_guide: "ガイド",
         tab_history: "履歴",
         tab_comments: "コメント",
+        tab_info: "情報",
         label_birth_date: "生年月日",
         solar_notice: "(陽暦)",
         label_birth_time: "生まれた時間",
@@ -303,7 +320,14 @@ const translations = {
         ai_section_marriage: "💍 配偶者運",
         ai_section_child: "👶 子供運",
         ai_section_money: "💰 金運",
-        ai_section_later: "👴 老後運"
+        ai_section_later: "👴 老後운",
+        info_title: "📱 アプリ情報",
+        info_copyright_title: "⚖️ 著作権およびライセンス",
+        info_copyright_content: "本アプリの四柱推命計算機能は、以下のオープンソースライブラリを使用しています。",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "GitHubリポジトリを表示",
+        info_license_title: "📜 ライセンス案内",
+        info_license_content: "このプログラムはMITライセンスの下で配布されているオープンソースコードを含んでおり、当該ライセンス規定を遵守します。"
     },
     es: {
         app_title: "CódigoNacimiento",
@@ -311,6 +335,7 @@ const translations = {
         tab_guide: "Guía",
         tab_history: "Historial",
         tab_comments: "Comentarios",
+        tab_info: "Información",
         label_birth_date: "Fecha de nacimiento",
         solar_notice: "(Solar)",
         label_birth_time: "Hora de nacimiento",
@@ -384,7 +409,14 @@ const translations = {
         ai_section_marriage: "💍 Pareja",
         ai_section_child: "👶 Hijos",
         ai_section_money: "💰 Dinero",
-        ai_section_later: "👴 Vejez"
+        ai_section_later: "👴 Vejez",
+        info_title: "📱 Información de la App",
+        info_copyright_title: "⚖️ Derechos de Autor y Licencia",
+        info_copyright_content: "La función de cálculo de Saju de esta aplicación utiliza la siguiente librería de código abierto.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "Ver Repositorio en GitHub",
+        info_license_title: "📜 Aviso de Licencia",
+        info_license_content: "Este programa incluye código de código abierto distribuido bajo la Licencia MIT y cumple con las regulaciones de la licencia."
     },
     de: {
         app_title: "GeburtsCode",
@@ -392,6 +424,7 @@ const translations = {
         tab_guide: "Anleitung",
         tab_history: "Verlauf",
         tab_comments: "Kommentare",
+        tab_info: "Info",
         label_birth_date: "Geburtsdatum",
         solar_notice: "(Solar)",
         label_birth_time: "Geburtszeit",
@@ -411,7 +444,6 @@ const translations = {
         btn_ai: "🤖 KI-Analyse anfordern",
         ai_result_title: "🤖 KI-Geburtscode-Analyse",
         ai_loading: "KI analysiert...<br>Bitte warten.",
-        guide_title: "📖 Was ist der GeburtsCode?",
         history_title: "📋 Verlauf",
         btn_clear_all: "Alle löschen",
         placeholder_nickname: "Spitzname (Optional)",
@@ -420,7 +452,14 @@ const translations = {
         solar_bday: "Geburtstag: ",
         gender_label: "Geschlecht: ",
         ai_section_overall: "🌟 Gesamtglück",
-        ai_section_money: "💰 Finanzen"
+        ai_section_money: "💰 Finanzen",
+        info_title: "📱 App-Informationen",
+        info_copyright_title: "⚖️ Urheberrecht & Lizenz",
+        info_copyright_content: "Die Saju-Berechnungsfunktion dieser App verwendet die folgende Open-Source-Bibliothek.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "GitHub-Repository anzeigen",
+        info_license_title: "📜 Lizenzhinweis",
+        info_license_content: "Dieses Programm enthält Open-Source-Code, der unter der MIT-Lizenz verbreitet wird und den Lizenzbestimmungen entspricht."
     },
     fr: {
         app_title: "CodeNaissance",
@@ -428,6 +467,7 @@ const translations = {
         tab_guide: "Guide",
         tab_history: "Historique",
         tab_comments: "Commentaires",
+        tab_info: "Infos",
         label_birth_date: "Date de naissance",
         solar_notice: "(Solaire)",
         label_birth_time: "Heure de naissance",
@@ -454,7 +494,14 @@ const translations = {
         solar_bday: "Anniversaire Solaire: ",
         gender_label: "Genre: ",
         ai_section_overall: "🌟 Fortune Globale",
-        ai_section_money: "💰 Argent"
+        ai_section_money: "💰 Argent",
+        info_title: "📱 Informations sur l'application",
+        info_copyright_title: "⚖️ Droit d'auteur et licence",
+        info_copyright_content: "La fonction de calcul Saju de cette application utilise la bibliothèque open-source suivante.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "Voir le dépôt GitHub",
+        info_license_title: "📜 Avis de licence",
+        info_license_content: "Ce programme contient du code open-source distribué sous la licence MIT et respecte les réglementations de la licence."
     },
     it: {
         app_title: "CodiceNascita",
@@ -462,6 +509,7 @@ const translations = {
         tab_guide: "Guida",
         tab_history: "Cronologia",
         tab_comments: "Commenti",
+        tab_info: "Info",
         label_birth_date: "Data di nascita",
         solar_notice: "(Solare)",
         label_birth_time: "Ora di nascita",
@@ -488,7 +536,14 @@ const translations = {
         solar_bday: "Compleanno Solare: ",
         gender_label: "Genere: ",
         ai_section_overall: "🌟 Fortuna Generale",
-        ai_section_money: "💰 Soldi"
+        ai_section_money: "💰 Soldi",
+        info_title: "📱 Informazioni sull'app",
+        info_copyright_title: "⚖️ Copyright e Licenza",
+        info_copyright_content: "La funzione di calcolo Saju di questa app utilizza la seguente libreria open-source.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "Visualizza repository GitHub",
+        info_license_title: "📜 Nota sulla licenza",
+        info_license_content: "Questo programma include codice open-source distribuito sotto la licenza MIT e rispetta le normative della licenza."
     },
     pt: {
         app_title: "CódigoNascimento",
@@ -496,6 +551,7 @@ const translations = {
         tab_guide: "Guia",
         tab_history: "Histórico",
         tab_comments: "Comentários",
+        tab_info: "Informações",
         label_birth_date: "Data de nascimento",
         solar_notice: "(Solar)",
         label_birth_time: "Hora de nascimento",
@@ -522,7 +578,14 @@ const translations = {
         solar_bday: "Aniversário Solar: ",
         gender_label: "Género: ",
         ai_section_overall: "🌟 Fortuna Geral",
-        ai_section_money: "💰 Dinheiro"
+        ai_section_money: "💰 Dinheiro",
+        info_title: "📱 Informações do App",
+        info_copyright_title: "⚖️ Direitos Autorais e Licença",
+        info_copyright_content: "A função de cálculo de Saju deste aplicativo utiliza a seguinte biblioteca de código aberto.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "Ver repositório no GitHub",
+        info_license_title: "📜 Aviso de Licença",
+        info_license_content: "Este programa inclui código de código aberto distribuído sob a Licenza MIT e cumpre os regulamentos da licença."
     },
     ar: {
         app_title: "كود الميلاد",
@@ -530,6 +593,7 @@ const translations = {
         tab_guide: "دليل",
         tab_history: "السجل",
         tab_comments: "تعليقات",
+        tab_info: "معلومات",
         label_birth_date: "تاريخ الميلاد",
         solar_notice: "(شمسي)",
         label_birth_time: "وقت الميلاد",
@@ -556,7 +620,14 @@ const translations = {
         solar_bday: "ميلاد شمسي: ",
         gender_label: "الجنس: ",
         ai_section_overall: "🌟 الحظ العام",
-        ai_section_money: "💰 المال"
+        ai_section_money: "💰 المال",
+        info_title: "📱 معلومات التطبيق",
+        info_copyright_title: "⚖️ حقوق الطبع والنشر والترخيص",
+        info_copyright_content: "تستخدم ميزة حساب Saju في هذا التطبيق مكتبة مفتوحة المصدر التالية.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "عرض مستودع GitHub",
+        info_license_title: "📜 إشعار الترخيص",
+        info_license_content: "يتضمن هذا البرنامج كود مفتوح المصدر تم توزيعه بموجب ترخيص MIT ويتوافق مع لوائح الترخيص."
     },
     pl: {
         app_title: "KodUrodzenia",
@@ -564,6 +635,7 @@ const translations = {
         tab_guide: "Poradnik",
         tab_history: "Historia",
         tab_comments: "Komentarze",
+        tab_info: "Info",
         label_birth_date: "Data urodzenia",
         solar_notice: "(Solarny)",
         label_birth_time: "Godzina urodzenia",
@@ -590,8 +662,15 @@ const translations = {
         solar_bday: "Urodziny: ",
         gender_label: "Płeć: ",
         ai_section_overall: "🌟 Ogólne szczęście",
-        ai_section_money: "💰 Pieniądze"
-    }
+        ai_section_money: "💰 Pieniądze",
+        info_title: "📱 Informacje o aplikacji",
+        info_copyright_title: "⚖️ Prawa autorskie i licencja",
+        info_copyright_content: "Funkcja obliczania Saju w tej aplikacji wykorzystuje następującą bibliotekę open-source.",
+        info_lib_name: "manseryeok-js (urstory)",
+        info_lib_link: "Zobacz repozytorium GitHub",
+        info_license_title: "📜 Informacja o licencji",
+        info_license_content: "Ten program zawiera kod open-source udostępniany na licencji MIT i jest zgodny z przepisami licencyjnymi."
+    },
 };
 
 export default translations;

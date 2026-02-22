@@ -264,7 +264,7 @@ window.onPaymentSuccess = async function (purchaseToken) {
 
         // Firebase Functions 호출
         const response = await fetch(
-            'https://us-central1-birthcode-c3154.cloudfunctions.net/analyzeSaju',
+            'https://analyzesaju-whar4qcnoa-uc.a.run.app',
             {
                 method: 'POST',
                 headers: {
@@ -274,7 +274,8 @@ window.onPaymentSuccess = async function (purchaseToken) {
                 },
                 body: JSON.stringify({
                     birthDate: birthDate,
-                    aiModel: 'Claude',
+                    //aiModel: 'Claude',
+                    aiModel: 'Gemini',
                     language: language,
                     purchaseToken: purchaseToken // 결제 토큰 추가
                 })

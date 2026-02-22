@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "767447901910",
-    "project_id": "birthcode-c3154",
-    "storage_bucket": "birthcode-c3154.firebasestorage.app"
+    "project_number": "561291533578",
+    "project_id": "birthcode02",
+    "storage_bucket": "birthcode02.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:767447901910:android:5828d0cc4870818fc98b77",
+        "mobilesdk_app_id": "1:561291533578:android:d2dbab39e35be5d166eef3",
         "android_client_info": {
-          "package_name": "com.doongdallong.birthcode"
+          "package_name": "com.doongdallong.birthcode02"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDeE4T-zN3R7ePhRkoFm9BuLfZBCh5YFKI"
+          "current_key": "AIzaSyAmGxdhbnSCvEabzCZhW--QsjuCX86HNvQ"
         }
       ],
       "services": {
