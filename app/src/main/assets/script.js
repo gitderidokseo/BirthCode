@@ -208,7 +208,7 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
 });
 
 // 결제 성공 시 호출되는 함수 (Android native에서 호출)
-window.onPaymentSuccess = async function () {
+window.onPaymentSuccess = async function (purchaseToken) {
     const t = getT();
     const aiResultDiv = document.getElementById('ai-result');
     const aiLoadingDiv = document.getElementById('ai-loading');
@@ -233,7 +233,7 @@ window.onPaymentSuccess = async function () {
     const birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     const language = currentLang === 'ko' ? 'ko' : 'en';
 
-    // App Check 토큰 가져오기 (Promise)
+    // App Check 토큰 가져오기
     const getAppToken = () => new Promise(resolve => {
         if (typeof Android !== 'undefined' && Android.getAppCheckToken) {
             window.receiveAppCheckToken = (token) => {
@@ -242,26 +242,41 @@ window.onPaymentSuccess = async function () {
             };
             Android.getAppCheckToken('receiveAppCheckToken');
         } else {
-            resolve(''); // 브라우저 환경 등에서는 빈값
+            resolve('');
+        }
+    });
+
+    // Auth 토큰 가져오기
+    const getAuthToken = () => new Promise(resolve => {
+        if (typeof Android !== 'undefined' && Android.getAuthToken) {
+            window.receiveAuthToken = (token) => {
+                delete window.receiveAuthToken;
+                resolve(token);
+            };
+            Android.getAuthToken('receiveAuthToken');
+        } else {
+            resolve('');
         }
     });
 
     try {
-        const appCheckToken = await getAppToken();
+        const [appCheckToken, authToken] = await Promise.all([getAppToken(), getAuthToken()]);
 
         // Firebase Functions 호출
         const response = await fetch(
-            'https://us-central1-birthcode-60426.cloudfunctions.net/analyzeSaju',
+            'https://us-central1-birthcode-c3154.cloudfunctions.net/analyzeSaju',
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Firebase-AppCheck': appCheckToken // App Check 헤더 추가
+                    'X-Firebase-AppCheck': appCheckToken,
+                    'Authorization': `Bearer ${authToken}` // Auth 토큰 추가
                 },
                 body: JSON.stringify({
                     birthDate: birthDate,
                     aiModel: 'Claude',
-                    language: language
+                    language: language,
+                    purchaseToken: purchaseToken // 결제 토큰 추가
                 })
             }
         );

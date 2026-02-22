@@ -1,5 +1,6 @@
 {
   "projects": {
+    "default": "birthcode-c3154",
     "stg": "birthcode-60426"
   },
   "targets": {},

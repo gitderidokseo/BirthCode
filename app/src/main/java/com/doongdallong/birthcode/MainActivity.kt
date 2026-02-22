@@ -22,21 +22,27 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 
+import com.google.firebase.auth.FirebaseAuth
+
 class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
     private lateinit var billingClient: BillingClient
     private lateinit var webView: WebView
+    private lateinit var auth: FirebaseAuth
     private var productDetails: ProductDetails? = null
 
     // Product ID (This must match the ID registered in the Play Console)
-    private val SKU_AI_INTERPRETATION = "ai_interpretation_1000"
+    private val SKU_AI_INTERPRETATION = "ai_detailed_analysis"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase and App Check
+        // Initialize Firebase, Auth and App Check
         FirebaseApp.initializeApp(this)
+        auth = FirebaseAuth.getInstance()
+        signInAnonymously()
+        
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
         firebaseAppCheck.installAppCheckProviderFactory(
             PlayIntegrityAppCheckProviderFactory.getInstance()
@@ -67,6 +73,19 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
         webView.loadUrl("file:///android_asset/index.html")
 
         initBillingClient()
+    }
+
+    private fun signInAnonymously() {
+        if (auth.currentUser == null) {
+            auth.signInAnonymously()
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        Log.d("Auth", "signInAnonymously:success")
+                    } else {
+                        Log.w("Auth", "signInAnonymously:failure", task.exception)
+                    }
+                }
+        }
     }
 
     private fun initBillingClient() {
@@ -129,7 +148,8 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             billingClient.consumeAsync(consumeParams) { billingResult, _ ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     runOnUiThread {
-                        webView.evaluateJavascript("javascript:onPaymentSuccess()", null)
+                        // Pass the purchase token to JS for server-side verification
+                        webView.evaluateJavascript("javascript:onPaymentSuccess('${purchase.purchaseToken}')", null)
                     }
                 }
             }
@@ -176,6 +196,27 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                         webView.evaluateJavascript("javascript:$callbackName('')", null)
                     }
                 }
+        }
+
+        @JavascriptInterface
+        fun getAuthToken(callbackName: String) {
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                user.getIdToken(false).addOnSuccessListener { result ->
+                    val token = result.token ?: ""
+                    runOnUiThread {
+                        webView.evaluateJavascript("javascript:$callbackName('$token')", null)
+                    }
+                }.addOnFailureListener {
+                    runOnUiThread {
+                        webView.evaluateJavascript("javascript:$callbackName('')", null)
+                    }
+                }
+            } else {
+                runOnUiThread {
+                    webView.evaluateJavascript("javascript:$callbackName('')", null)
+                }
+            }
         }
     }
 

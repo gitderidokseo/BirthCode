@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BirthCode Design Assets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5B4FCF;
+            --primary-dark: #4037A8;
+            --bg: #0f0c29;
+            /* Deep space */
+            --gradient: linear-gradient(135deg, #5B4FCF 0%, #4037A8 100%);
+            --header-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f0f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 50px;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        h2 {
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        .info {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        /* 개발자 아이콘 (512x512) */
+        .icon-container {
+            width: 512px;
+            height: 512px;
+            background: var(--gradient);
+            border-radius: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(64, 55, 168, 0.3);
+        }
+
+        .icon-symbol {
+            font-size: 260px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+            z-index: 2;
+        }
+
+        .icon-bg-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+        }
+
+        .icon-code-text {
+            position: absolute;
+            bottom: 60px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 900;
+            font-size: 40px;
+            letter-spacing: 2px;
+        }
+
+        /* 헤더 이미지 (4096x2304) */
+        .header-container {
+            width: 1024px;
+            /* Scaled down for display */
+            height: 576px;
+            /* 16:9 ratio */
+            background: var(--header-gradient);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0, 0, 0, 0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.5;
+        }
+
+        .nebula {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 50% 50%, rgba(91, 79, 207, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 112, 67, 0.1) 0%, transparent 40%);
+            top: -25%;
+            left: -25%;
+            filter: blur(80px);
+        }
+
+        .header-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 5;
+        }
+
+        .header-title h1 {
+            font-size: 80px;
+            margin: 0;
+            letter-spacing: -2px;
+            background: linear-gradient(to bottom, #fff, #ddd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            font-size: 24px;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .screenshot-hint {
+            margin-top: 10px;
+            background: #fff8e1;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="section">
+        <h2>1. 개발자 아이콘 (512 x 512)</h2>
+        <p class="info">구글 플레이 콘솔의 "개발자 아이콘" 항목에 업로드하세요.</p>
+        <div id="icon-export" class="icon-container">
+            <div class="icon-bg-effect"></div>
+            <div class="icon-symbol">🔮</div>
+            <div class="icon-code-text">&lt; BIRTH / CODE &gt;</div>
+        </div>
+        <div class="screenshot-hint">
+            💡 <strong>스크린샷 팁:</strong> 브라우저에서 이 페이지를 열고, 위 사각형 영역만 캡처하여 512x512 크기로 저장하세요.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. 헤더 이미지 (4096 x 2304 필수, 비율 16:9)</h2>
+        <p class="info">구글 플레이 콘솔의 "헤더 이미지" 항목에 업로드하세요.</p>
+        <div id="header-export" class="header-container">
+            <div class="nebula"></div>
+            <div class="stars"></div>
+            <div class="header-title">
+                <h1>BirthCode</h1>
+                <p>당신의 운명을 코딩하다</p>
+            </div>
+        </div>
+        <div class="screenshot-hint">
+            💡 <strong>스크린샷 팁:</strong> 이 영역을 캡처한 뒤, 이미지 편집기에서 4096x2304 크기로 리사이즈하여 업로드하세요.
+        </div>
+    </div>
+
+    <p style="color: #888; font-size: 12px;">Anthropic Antigravity Design System v1.0</p>
+
+</body>
+
+</html>

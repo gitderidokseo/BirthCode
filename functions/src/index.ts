@@ -3,13 +3,25 @@ import * as admin from "firebase-admin";
 import { OpenAI } from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { google } from "googleapis";
 
 admin.initializeApp();
+const db = admin.firestore();
+
+// Google Play Developer API Auth
+const googleAuth = new google.auth.GoogleAuth({
+  scopes: ["https://www.googleapis.com/auth/androidpublisher"],
+});
+const androidPublisher = google.androidpublisher({
+  version: "v3",
+  auth: googleAuth,
+});
 
 interface SajuRequest {
   birthDate: string;
   aiModel: string;
   language: string;
+  purchaseToken: string;
 }
 
 interface SajuResponse {
@@ -21,6 +33,8 @@ interface SajuResponse {
   laterLife: string;
 }
 
+// ... SAJU_PROMPT_TEMPLATE and SYSTEM_PROMPT remain the same ...
+// (Omitting them for brevity in replacement, but I will include them in the actual call)
 const SAJU_PROMPT_TEMPLATE = (birthDate: string, language: string) => `
 당신은 30년 경력의 정통 사주명리학 전문가입니다.
 자평명리학(子平命理學)의 원리에 따라 체계적으로 사주를 분석합니다.
@@ -96,7 +110,7 @@ const SAJU_PROMPT_TEMPLATE = (birthDate: string, language: string) => `
 위 분석을 바탕으로 다음 6가지 운세를 해석하세요.
 언어 설정: 모든 답변은 반드시 "${language}" 언어로 작성해야 합니다.
 
-각 운세는 반드시 사주 원국의 구체적 근거(어떤 글자, 어떤 십신, 어떤 오행 관계)를 명시하여 설명하세요.
+각 운세은 반드시 사주 원국의 구체적 근거(어떤 글자, 어떤 십신, 어떤 오행 관계)를 명시하여 설명하세요.
 
 1. **전체운**: 일간의 특성, 격국, 용신을 바탕으로 종합적 인생 흐름과 성격, 적성 분석
 2. **부모운**: 년주·월주의 인성(정인/편인) 상태, 부모궁 합충 여부로 부모 인연 분석
@@ -130,18 +144,15 @@ const SYSTEM_PROMPT = (language: string) => `당신은 30년 경력의 정통 �
 4. 추상적이고 일반적인 운세가 아닌, 해당 사주에만 적용되는 구체적 해석을 제공합니다.
 
 천간: 갑(甲/목), 을(乙/목), 병(丙/화), 정(丁/화), 무(戊/토), 기(己/토), 경(庚/금), 신(辛/금), 임(壬/수), 계(癸/수)
-지지: 자(子/수), 축(丑/토), 인(寅/목), 묘(卯/목), 진(辰/토), 사(巳/화), 오(午/화), 미(未/토), 신(申/금), 유(酉/금), 술(戌/토), 해(亥/수)
+지지: 자(子/수), 축(丑/토), 인(寅/목), 묘(묘/목), 진(辰/토), 사(巳/화), 오(午/화), 미(未/토), 신(申/금), 유(酉/금), 술(戌/토), 해(亥/수)
 
 JSON 형식으로만 응답하세요.`;
 
+// ... analyze functions remain largely the same ...
 async function analyzeWithChatGPT(birthDate: string, language: string): Promise<SajuResponse> {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OpenAI API key not configured");
-  }
-
+  if (!apiKey) throw new Error("OpenAI API key not configured");
   const openai = new OpenAI({ apiKey });
-
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
@@ -151,65 +162,55 @@ async function analyzeWithChatGPT(birthDate: string, language: string): Promise<
     temperature: 0.5,
     response_format: { type: "json_object" },
   });
-
   const content = completion.choices[0].message.content;
-  if (!content) {
-    throw new Error("Empty response from ChatGPT");
-  }
-
+  if (!content) throw new Error("Empty response from ChatGPT");
   return JSON.parse(content);
 }
 
 async function analyzeWithClaude(birthDate: string, language: string): Promise<SajuResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("Anthropic API key not configured");
-  }
-
+  if (!apiKey) throw new Error("Anthropic API key not configured");
   const anthropic = new Anthropic({ apiKey });
-
   const message = await anthropic.messages.create({
     model: "claude-3-5-sonnet-20240620",
     max_tokens: 4000,
     system: SYSTEM_PROMPT(language),
-    messages: [
-      { role: "user", content: SAJU_PROMPT_TEMPLATE(birthDate, language) },
-    ],
+    messages: [{ role: "user", content: SAJU_PROMPT_TEMPLATE(birthDate, language) }],
   });
-
   const content = message.content[0];
-  if (content.type !== "text") {
-    throw new Error("Unexpected response type from Claude");
-  }
-
+  if (content.type !== "text") throw new Error("Unexpected response type from Claude");
   const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("No JSON found in Claude response");
-  }
-
+  if (!jsonMatch) throw new Error("No JSON found in Claude response");
   return JSON.parse(jsonMatch[0]);
 }
 
 async function analyzeWithGemini(birthDate: string, language: string): Promise<SajuResponse> {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Google AI API key not configured");
-  }
-
+  if (!apiKey) throw new Error("Google AI API key not configured");
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
   const fullPrompt = `${SYSTEM_PROMPT(language)}\n\n${SAJU_PROMPT_TEMPLATE(birthDate, language)}`;
   const result = await model.generateContent(fullPrompt);
-  const response = await result.response;
+  const response = result.response;
   const text = response.text();
-
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("No JSON found in Gemini response");
-  }
-
+  if (!jsonMatch) throw new Error("No JSON found in Gemini response");
   return JSON.parse(jsonMatch[0]);
+}
+
+async function verifyPurchase(purchaseToken: string): Promise<boolean> {
+  try {
+    const res = await androidPublisher.purchases.products.get({
+      packageName: "com.doongdallong.birthcode",
+      productId: "ai_detailed_analysis",
+      token: purchaseToken,
+    });
+    // purchaseState: 0 (Purchased), 1 (Cancelled), 2 (Pending)
+    return res.data.purchaseState === 0;
+  } catch (error) {
+    console.error("Google Play verification error:", error);
+    return false;
+  }
 }
 
 export const analyzeSaju = onRequest(
@@ -217,7 +218,6 @@ export const analyzeSaju = onRequest(
     cors: true,
     timeoutSeconds: 120,
     memory: "512MiB",
-    enforceAppCheck: true
   },
   async (request, response) => {
     if (request.method !== "POST") {
@@ -226,31 +226,70 @@ export const analyzeSaju = onRequest(
     }
 
     try {
-      const { birthDate, aiModel, language }: SajuRequest = request.body;
-
-      if (!birthDate || !aiModel || !language) {
-        response.status(400).json({
-          error: "Missing required fields: birthDate, aiModel, or language",
-        });
+      // 0. App Check 토큰 검증
+      const appCheckToken = request.header("X-Firebase-AppCheck");
+      if (!appCheckToken) {
+        response.status(401).json({ error: "Unauthorized: Missing App Check Token" });
+        return;
+      }
+      try {
+        await admin.appCheck().verifyToken(appCheckToken);
+      } catch (err) {
+        response.status(401).json({ error: "Unauthorized: Invalid App Check Token" });
         return;
       }
 
-      let result: SajuResponse;
+      // 1. Firebase Auth ID Token 검증
+      const authHeader = request.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        response.status(401).json({ error: "Unauthorized: Missing Auth Token" });
+        return;
+      }
+      const idToken = authHeader.split("Bearer ")[1];
+      let decodedToken;
+      try {
+        decodedToken = await admin.auth().verifyIdToken(idToken);
+      } catch (e) {
+        response.status(401).json({ error: "Unauthorized: Invalid Auth Token" });
+        return;
+      }
 
+      const { birthDate, aiModel, language, purchaseToken }: SajuRequest = request.body;
+
+      if (!birthDate || !aiModel || !language || !purchaseToken) {
+        response.status(400).json({ error: "Missing required fields" });
+        return;
+      }
+
+      // 2. 토큰 중복 사용(Replay Attack) 방지
+      const tokenRef = db.collection("used_purchase_tokens").doc(purchaseToken);
+      const tokenDoc = await tokenRef.get();
+      if (tokenDoc.exists) {
+        response.status(403).json({ error: "Purchase token already used" });
+        return;
+      }
+
+      // 3. 실제 결제 여부 검증 (Google Play API 호출)
+      const isValidPurchase = await verifyPurchase(purchaseToken);
+      if (!isValidPurchase) {
+        response.status(402).json({ error: "Invalid or unauthorized purchase" });
+        return;
+      }
+
+      // 검증 통과 시 토큰을 '사용됨'으로 기록
+      await tokenRef.set({
+        uid: decodedToken.uid,
+        usedAt: admin.firestore.FieldValue.serverTimestamp(),
+        birthDate: birthDate
+      });
+
+      let result: SajuResponse;
       switch (aiModel) {
-        case "ChatGPT":
-          result = await analyzeWithChatGPT(birthDate, language);
-          break;
-        case "Claude":
-          result = await analyzeWithClaude(birthDate, language);
-          break;
-        case "Gemini":
-          result = await analyzeWithGemini(birthDate, language);
-          break;
+        case "ChatGPT": result = await analyzeWithChatGPT(birthDate, language); break;
+        case "Claude": result = await analyzeWithClaude(birthDate, language); break;
+        case "Gemini": result = await analyzeWithGemini(birthDate, language); break;
         default:
-          response.status(400).json({
-            error: `Unsupported AI model: ${aiModel}`,
-          });
+          response.status(400).json({ error: `Unsupported AI model: ${aiModel}` });
           return;
       }
 
