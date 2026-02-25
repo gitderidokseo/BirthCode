@@ -172,7 +172,7 @@ async function analyzeWithClaude(birthDate: string, language: string): Promise<S
   if (!apiKey) throw new Error("Anthropic API key not configured");
   const anthropic = new Anthropic({ apiKey });
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+    model: "claude-opus-4-6",
     max_tokens: 4000,
     system: SYSTEM_PROMPT(language),
     messages: [{ role: "user", content: SAJU_PROMPT_TEMPLATE(birthDate, language) }],

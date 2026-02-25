@@ -343,8 +343,8 @@ window.onPaymentSuccess = async function (purchaseToken) {
                 },
                 body: JSON.stringify({
                     birthDate: birthDate,
-                    //aiModel: 'Claude',
-                    aiModel: 'Gemini',
+                    aiModel: 'Claude',
+                    //aiModel: 'Gemini',
                     language: language,
                     purchaseToken: purchaseToken // 결제 토큰 추가
                 })
