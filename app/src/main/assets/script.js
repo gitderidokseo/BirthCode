@@ -8,11 +8,12 @@ let currentLang = 'ko'; // 기본 언어
 
 // ===== 로컬 스토리지 키 =====
 const HISTORY_KEY = 'saju_history';
-const COMMENTS_KEY = 'saju_comments';
+
 
 // ===== 초기화 =====
 document.addEventListener('DOMContentLoaded', () => {
     initLanguage();
+    initDatePickers();
 });
 
 function initLanguage() {
@@ -22,6 +23,82 @@ function initLanguage() {
 
     // UI 번역 적용
     applyTranslations();
+}
+
+function initDatePickers() {
+    const yearSelect = document.getElementById('year-select');
+    const monthSelect = document.getElementById('month-select');
+    const daySelect = document.getElementById('day-select');
+    const hourSelect = document.getElementById('hour-select');
+    const minuteSelect = document.getElementById('minute-select');
+
+    if (!yearSelect) return;
+
+    const t = getT();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Populate Year (1900 to 2050)
+    yearSelect.innerHTML = '';
+    for (let y = 1900; y <= 2050; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `${y}${t.unit_year}`;
+        if (y === 1990) opt.selected = true; // Default to a common birth year
+        yearSelect.appendChild(opt);
+    }
+
+    // Populate Month
+    monthSelect.innerHTML = '';
+    for (let m = 1; m <= 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = `${m}${t.unit_month}`;
+        if (m === now.getMonth() + 1) opt.selected = true;
+        monthSelect.appendChild(opt);
+    }
+
+    // Populate Hour
+    hourSelect.innerHTML = '';
+    for (let h = 0; h < 24; h++) {
+        const opt = document.createElement('option');
+        opt.value = h;
+        opt.textContent = `${String(h).padStart(2, '0')}${t.unit_hour}`;
+        hourSelect.appendChild(opt);
+    }
+
+    // Populate Minute
+    minuteSelect.innerHTML = '';
+    for (let i = 0; i < 60; i += 10) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${String(i).padStart(2, '0')}${t.unit_minute}`;
+        minuteSelect.appendChild(opt);
+    }
+
+    // Update Days
+    const updateDays = () => {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        const prevSelectedDay = parseInt(daySelect.value) || now.getDate();
+
+        daySelect.innerHTML = '';
+        for (let d = 1; d <= daysInMonth; d++) {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = `${d}${t.unit_day}`;
+            if (d === prevSelectedDay || (d === daysInMonth && prevSelectedDay > daysInMonth)) {
+                opt.selected = true;
+            }
+            daySelect.appendChild(opt);
+        }
+    };
+
+    yearSelect.addEventListener('change', updateDays);
+    monthSelect.addEventListener('change', updateDays);
+    updateDays(); // Initial call
 }
 
 function applyTranslations() {
@@ -64,8 +141,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
         // 이력 탭 선택 시 렌더링
         if (tabId === 'history') renderHistory();
-        // 댓글 탭 선택 시 렌더링
-        if (tabId === 'comments') renderComments();
+
     });
 });
 
@@ -73,21 +149,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 document.getElementById('calculate-btn').addEventListener('click', () => {
     try {
         const t = getT();
-        const dateInput = document.getElementById('birth-date').value;
-        let timeInput = document.getElementById('birth-time').value;
+        const year = parseInt(document.getElementById('year-select').value);
+        const month = parseInt(document.getElementById('month-select').value);
+        const day = parseInt(document.getElementById('day-select').value);
+        const hour = parseInt(document.getElementById('hour-select').value);
+        const minute = parseInt(document.getElementById('minute-select').value);
         const longitudeInput = document.getElementById('longitude').value;
         const gender = document.querySelector('input[name="gender"]:checked').value;
 
-        if (!dateInput) {
-            alert(t.alert_no_date);
-            return;
-        }
-
-        // 시간 미입력 시 00:00으로 처리
-        if (!timeInput) timeInput = '00:00';
-
-        const [year, month, day] = dateInput.split('-').map(Number);
-        const [hour, minute] = timeInput.split(':').map(Number);
         const longitude = parseFloat(longitudeInput);
 
         if (isNaN(longitude)) {
@@ -504,93 +573,7 @@ function renderHistory() {
     list.innerHTML = html;
 }
 
-// ===== 댓글 관리 =====
-function getComments() {
-    try {
-        return JSON.parse(localStorage.getItem(COMMENTS_KEY) || '[]');
-    } catch {
-        return [];
-    }
-}
 
-// 글자 수 카운터
-const commentTextarea = document.getElementById('comment-text');
-if (commentTextarea) {
-    commentTextarea.addEventListener('input', () => {
-        document.getElementById('char-count').textContent = commentTextarea.value.length;
-    });
-}
-
-window.submitComment = function () {
-    const t = getT();
-    const nameInput = document.getElementById('comment-name');
-    const textInput = document.getElementById('comment-text');
-    const name = nameInput.value.trim() || 'Anonymous';
-    const text = textInput.value.trim();
-
-    if (!text) {
-        alert('Check input');
-        return;
-    }
-
-    const comments = getComments();
-    comments.unshift({
-        id: Date.now(),
-        name,
-        text,
-        timestamp: Date.now()
-    });
-
-    localStorage.setItem(COMMENTS_KEY, JSON.stringify(comments));
-
-    // 입력 초기화
-    nameInput.value = '';
-    textInput.value = '';
-    document.getElementById('char-count').textContent = '0';
-
-    renderComments();
-};
-
-window.deleteComment = function (id) {
-    const t = getT();
-    if (!confirm(t.alert_confirm_delete_comment)) return;
-    let comments = getComments();
-    comments = comments.filter(c => c.id !== id);
-    localStorage.setItem(COMMENTS_KEY, JSON.stringify(comments));
-    renderComments();
-};
-
-function renderComments() {
-    const list = document.getElementById('comments-list');
-    const comments = getComments();
-    const t = getT();
-
-    if (comments.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <p>💬</p>
-                <p>${t.comments_empty}</p>
-            </div>`;
-        return;
-    }
-
-    let html = '';
-    comments.forEach(comment => {
-        html += `
-        <div class="comment-item">
-            <div class="comment-item-header">
-                <span class="comment-author">${escapeHtml(comment.name)}</span>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="comment-time">${formatDate(comment.timestamp)}</span>
-                    <button class="comment-delete-btn" onclick="deleteComment(${comment.id})">${t.btn_delete}</button>
-                </div>
-            </div>
-            <div class="comment-text">${escapeHtml(comment.text).replace(/\n/g, '<br>')}</div>
-        </div>`;
-    });
-
-    list.innerHTML = html;
-}
 
 // ===== 유틸리티 =====
 function formatDate(timestamp) {

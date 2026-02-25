@@ -19,7 +19,7 @@
         <button class="tab-btn active" data-tab="saju" data-i18n="tab_saju">사주보기</button>
         <button class="tab-btn" data-tab="guide" data-i18n="tab_guide">사주 안내</button>
         <button class="tab-btn" data-tab="history" data-i18n="tab_history">이력</button>
-        <button class="tab-btn" data-tab="comments" data-i18n="tab_comments">댓글</button>
+
         <button class="tab-btn" data-tab="info" data-i18n="tab_info">정보</button>
     </div>
 
@@ -29,11 +29,18 @@
             <div class="input-group">
                 <label for="birth-date"><span data-i18n="label_birth_date">생년월일</span> <span class="solar-notice"
                         data-i18n="solar_notice">(양력)</span></label>
-                <input type="date" id="birth-date" required>
+                <div class="birth-date-container">
+                    <select id="year-select" class="date-select"></select>
+                    <select id="month-select" class="date-select"></select>
+                    <select id="day-select" class="date-select"></select>
+                </div>
             </div>
             <div class="input-group">
                 <label for="birth-time" data-i18n="label_birth_time">태어난 시간</label>
-                <input type="time" id="birth-time">
+                <div class="birth-time-container">
+                    <select id="hour-select" class="time-select"></select>
+                    <select id="minute-select" class="time-select"></select>
+                </div>
                 <small class="hint" data-i18n="time_hint">* 시간을 모르면 비워두세요 (00:00으로 처리)</small>
             </div>
             <div class="input-group">
@@ -216,32 +223,7 @@
         </div>
     </div>
 
-    <!-- ===== 탭 4: 댓글 ===== -->
-    <div id="tab-comments" class="tab-content hidden">
-        <div class="container">
-            <h2 class="section-title" data-i18n="comments_title">💬 자유 댓글</h2>
-            <p class="comments-desc" data-i18n="comments_desc">사주에 대한 경험이나 의견을 자유롭게 나눠보세요.</p>
 
-            <!-- 댓글 작성 폼 -->
-            <div class="comment-form">
-                <div class="input-group">
-                    <input type="text" id="comment-name" placeholder="닉네임 (선택)" maxlength="20"
-                        data-i18n-placeholder="placeholder_nickname">
-                </div>
-                <div class="input-group">
-                    <textarea id="comment-text" placeholder="댓글을 입력하세요..." rows="3" maxlength="500"
-                        data-i18n-placeholder="placeholder_comment"></textarea>
-                    <small class="char-count"><span id="char-count">0</span>/500</small>
-                </div>
-                <button id="submit-comment-btn" class="btn-primary" onclick="submitComment()"
-                    data-i18n="btn_submit_comment">💬 댓글 등록</button>
-            </div>
-
-            <!-- 댓글 목록 -->
-            <div id="comments-list">
-            </div>
-        </div>
-    </div>
 
     <!-- ===== 탭 5: 정보 ===== -->
     <div id="tab-info" class="tab-content hidden">

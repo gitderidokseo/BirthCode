@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">출생코드</string>
+    <string name="app_name">출생코드 - AI 사주 팔자</string>
     <string name="msg_payment_cancelled">결제가 취소되었습니다.</string>
     <string name="msg_error_occurred">오류가 발생했습니다: %1$s</string>
     <string name="msg_loading_payment">결제 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.</string>
