@@ -167,12 +167,26 @@ async function analyzeWithChatGPT(birthDate: string, language: string): Promise<
   return JSON.parse(content);
 }
 
-async function analyzeWithClaude(birthDate: string, language: string): Promise<SajuResponse> {
+interface ModelTierConfig {
+  claudeModel: string;
+  productId: string; // Play Console에 등록된 인앱 상품 ID (등급별로 가격이 다름)
+}
+
+// "Claude"는 구버전 앱(스토어 배포본)이 여전히 보내는 값이라 하위 호환을 위해 "basic" 상품과 함께 남겨둠
+const MODEL_TIER_CONFIG: Record<string, ModelTierConfig> = {
+  Claude: { claudeModel: "claude-opus-4-8", productId: "basic" },
+  Haiku: { claudeModel: "claude-haiku-4-5-20251001", productId: "saju_haiku" },
+  Sonnet: { claudeModel: "claude-sonnet-5", productId: "saju_sonnet" },
+  Opus: { claudeModel: "claude-opus-4-8", productId: "saju_opus" },
+  Fable: { claudeModel: "claude-fable-5", productId: "saju_fable" },
+};
+
+async function analyzeWithClaude(birthDate: string, language: string, model: string): Promise<SajuResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("Anthropic API key not configured");
   const anthropic = new Anthropic({ apiKey });
   const message = await anthropic.messages.create({
-    model: "claude-opus-4-6",
+    model,
     max_tokens: 4000,
     system: SYSTEM_PROMPT(language),
     messages: [{ role: "user", content: SAJU_PROMPT_TEMPLATE(birthDate, language) }],
@@ -198,11 +212,11 @@ async function analyzeWithGemini(birthDate: string, language: string): Promise<S
   return JSON.parse(jsonMatch[0]);
 }
 
-async function verifyPurchase(purchaseToken: string): Promise<boolean> {
+async function verifyPurchase(purchaseToken: string, productId: string): Promise<boolean> {
   try {
     const res = await androidPublisher.purchases.products.get({
       packageName: "com.doongdallong.birthcode02",
-      productId: "basic",
+      productId,
       token: purchaseToken,
     });
     // purchaseState: 0 (Purchased), 1 (Cancelled), 2 (Pending)
@@ -270,6 +284,12 @@ export const analyzeSaju = onRequest(
         return;
       }
 
+      const tierConfig = MODEL_TIER_CONFIG[aiModel];
+      if (!tierConfig) {
+        response.status(400).json({ error: `Unsupported AI model: ${aiModel}` });
+        return;
+      }
+
       // 2. 토큰 중복 사용(Replay Attack) 방지 (Firestore 연결 실패 시에도 진행되도록 예외 처리)
       const tokenRef = db.collection("used_purchase_tokens").doc(purchaseToken);
       try {
@@ -284,7 +304,8 @@ export const analyzeSaju = onRequest(
       }
 
       // 3. 실제 결제 여부 검증 (Google Play API 호출 - 필수)
-      const isValidPurchase = await verifyPurchase(purchaseToken);
+      // productId를 aiModel 등급으로 강제 지정하므로, 저가 상품 토큰으로 고가 등급을 요청하면 Play API 검증에서 실패한다.
+      const isValidPurchase = await verifyPurchase(purchaseToken, tierConfig.productId);
       if (!isValidPurchase) {
         console.warn("Invalid purchase verification for token:", purchaseToken);
         response.status(402).json({ error: "Invalid or unauthorized purchase" });
@@ -303,21 +324,7 @@ export const analyzeSaju = onRequest(
         console.error("Firestore Save Error:", err);
       }
 
-      let result: SajuResponse;
-      // Force Claude model for all requests
-      console.log(`Requested model: ${aiModel}, but forcing Claude (claude-opus-4-6)`);
-      result = await analyzeWithClaude(birthDate, language);
-
-      /*
-      switch (aiModel) {
-        case "ChatGPT": result = await analyzeWithChatGPT(birthDate, language); break;
-        case "Claude": result = await analyzeWithClaude(birthDate, language); break;
-        case "Gemini": result = await analyzeWithGemini(birthDate, language); break;
-        default:
-          response.status(400).json({ error: `Unsupported AI model: ${aiModel}` });
-          return;
-      }
-      */
+      const result = await analyzeWithClaude(birthDate, language, tierConfig.claudeModel);
 
       response.status(200).json(result);
     } catch (error) {

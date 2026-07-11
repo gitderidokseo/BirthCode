@@ -14,6 +14,7 @@ const HISTORY_KEY = 'saju_history';
 document.addEventListener('DOMContentLoaded', () => {
     initLanguage();
     initDatePickers();
+    requestModelPrices();
 });
 
 function initLanguage() {
@@ -257,6 +258,37 @@ ${t.copy_prompt_main}`;
     });
 });
 
+// ===== AI 모델 등급별 Play Console 상품 ID (가격은 등급마다 다름) =====
+const MODEL_PRODUCT_ID = {
+    Haiku: 'saju_haiku',
+    Sonnet: 'saju_sonnet',
+    Opus: 'saju_opus',
+    Fable: 'saju_fable'
+};
+
+function applyModelPrices(prices) {
+    Object.entries(MODEL_PRODUCT_ID).forEach(([model, productId]) => {
+        const price = prices[productId];
+        const option = document.querySelector(`#ai-model-select option[value="${model}"]`);
+        if (option && price) {
+            option.textContent = `${model} (${price})`;
+        }
+    });
+}
+
+// Android 네이티브가 Play Billing 조회를 마치면 호출 (지역별 실제 통화 가격)
+window.updateModelPrices = applyModelPrices;
+
+function requestModelPrices() {
+    if (typeof Android !== 'undefined' && Android.getModelPrices) {
+        window.receiveModelPrices = (prices) => {
+            delete window.receiveModelPrices;
+            applyModelPrices(prices);
+        };
+        Android.getModelPrices('receiveModelPrices');
+    }
+}
+
 // ===== AI 상세 풀이 요청 =====
 document.getElementById('ai-btn').addEventListener('click', async () => {
     const t = getT();
@@ -265,9 +297,12 @@ document.getElementById('ai-btn').addEventListener('click', async () => {
         return;
     }
 
+    const selectedModel = document.getElementById('ai-model-select')?.value || 'Opus';
+    const productId = MODEL_PRODUCT_ID[selectedModel] || MODEL_PRODUCT_ID.Opus;
+
     // Android 앱 내 결제 요청
     if (typeof Android !== 'undefined' && Android.startPayment) {
-        Android.startPayment();
+        Android.startPayment(productId);
     } else {
         // 앱 환경이 아닐 경우 (브라우저 테스트용)
         if (confirm(t.alert_confirm_payment)) {
@@ -343,8 +378,7 @@ window.onPaymentSuccess = async function (purchaseToken) {
                 },
                 body: JSON.stringify({
                     birthDate: birthDate,
-                    aiModel: 'Claude',
-                    //aiModel: 'Gemini',
+                    aiModel: document.getElementById('ai-model-select')?.value || 'Opus',
                     language: language,
                     purchaseToken: purchaseToken // 결제 토큰 추가
                 })

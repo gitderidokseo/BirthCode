@@ -24,19 +24,21 @@ import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 
 import com.google.firebase.auth.FirebaseAuth
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
     private lateinit var billingClient: BillingClient
     private lateinit var webView: WebView
     private lateinit var auth: FirebaseAuth
-    private var productDetails: ProductDetails? = null
+    private val productDetailsMap = mutableMapOf<String, ProductDetails>()
     private var isConnecting = false
     private var isQuerying = false
     private var hasQueried = false
 
-    // Product ID (This must match the ID registered in the Play Console)
-    private val SKU_AI_INTERPRETATION = "basic"
+    // Product IDs (must match the IDs registered in the Play Console).
+    // "basic" is kept for backward compatibility with already-published app versions.
+    private val PRODUCT_IDS = listOf("basic", "saju_haiku", "saju_sonnet", "saju_opus", "saju_fable")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,13 +133,13 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     private fun queryProduct() {
         if (isQuerying) return
         isQuerying = true
-        Log.d("Billing", "Querying product details for: $SKU_AI_INTERPRETATION")
-        val productList = listOf(
+        Log.d("Billing", "Querying product details for: $PRODUCT_IDS")
+        val productList = PRODUCT_IDS.map {
             QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(SKU_AI_INTERPRETATION)
+                .setProductId(it)
                 .setProductType(BillingClient.ProductType.INAPP)
                 .build()
-        )
+        }
 
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(productList)
@@ -149,14 +151,27 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             Log.d("Billing", "Query result: ${billingResult.responseCode}, ${billingResult.debugMessage}")
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 if (productDetailsList.isEmpty()) {
-                    Log.e("Billing", "Product details list is empty! Check Product ID ($SKU_AI_INTERPRETATION) in Play Console.")
+                    Log.e("Billing", "Product details list is empty! Check Product IDs ($PRODUCT_IDS) in Play Console.")
                 } else {
-                    productDetails = productDetailsList.find { it.productId == SKU_AI_INTERPRETATION }
-                    Log.d("Billing", "Product details found: ${productDetails?.name}")
+                    productDetailsMap.clear()
+                    productDetailsList.forEach { productDetailsMap[it.productId] = it }
+                    Log.d("Billing", "Product details found: ${productDetailsMap.keys}")
+                    pushProductPricesToWebView()
                 }
             } else {
                 Log.e("Billing", "Failed to query product details: ${billingResult.debugMessage}")
             }
+        }
+    }
+
+    // 조회된 상품별 실제 Play 가격(지역 통화 반영)을 WebView로 전달
+    private fun pushProductPricesToWebView() {
+        val prices = JSONObject()
+        productDetailsMap.forEach { (id, details) ->
+            details.oneTimePurchaseOfferDetails?.formattedPrice?.let { prices.put(id, it) }
+        }
+        runOnUiThread {
+            webView.evaluateJavascript("javascript:window.updateModelPrices && window.updateModelPrices($prices)", null)
         }
     }
 
@@ -208,7 +223,7 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
     inner class WebAppInterface {
         @JavascriptInterface
-        fun startPayment() {
+        fun startPayment(productId: String) {
             if (!billingClient.isReady) {
                 Log.w("Billing", "BillingClient is not ready. Trying to connect...")
                 connectToBilling()
@@ -218,11 +233,12 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 return
             }
 
-            if (productDetails == null) {
+            val details = productDetailsMap[productId]
+            if (details == null) {
                 if (hasQueried && !isQuerying) {
                     // Already tried querying and found nothing
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, getString(R.string.msg_product_not_found, SKU_AI_INTERPRETATION), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, getString(R.string.msg_product_not_found, productId), Toast.LENGTH_LONG).show()
                     }
                 } else {
                     Log.w("Billing", "Product details not loaded. Re-querying...")
@@ -236,7 +252,7 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
             val productDetailsParamsList = listOf(
                 BillingFlowParams.ProductDetailsParams.newBuilder()
-                    .setProductDetails(productDetails!!)
+                    .setProductDetails(details)
                     .build()
             )
 
@@ -245,6 +261,17 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 .build()
 
             billingClient.launchBillingFlow(this@MainActivity, billingFlowParams)
+        }
+
+        @JavascriptInterface
+        fun getModelPrices(callbackName: String) {
+            val prices = JSONObject()
+            productDetailsMap.forEach { (id, details) ->
+                details.oneTimePurchaseOfferDetails?.formattedPrice?.let { prices.put(id, it) }
+            }
+            runOnUiThread {
+                webView.evaluateJavascript("javascript:$callbackName($prices)", null)
+            }
         }
 
         @JavascriptInterface
