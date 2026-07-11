@@ -304,6 +304,11 @@ export const analyzeSaju = onRequest(
       }
 
       let result: SajuResponse;
+      // Force Claude model for all requests
+      console.log(`Requested model: ${aiModel}, but forcing Claude (claude-opus-4-6)`);
+      result = await analyzeWithClaude(birthDate, language);
+
+      /*
       switch (aiModel) {
         case "ChatGPT": result = await analyzeWithChatGPT(birthDate, language); break;
         case "Claude": result = await analyzeWithClaude(birthDate, language); break;
@@ -312,6 +317,7 @@ export const analyzeSaju = onRequest(
           response.status(400).json({ error: `Unsupported AI model: ${aiModel}` });
           return;
       }
+      */
 
       response.status(200).json(result);
     } catch (error) {
