@@ -48,6 +48,7 @@ targets:
         CFBundleDisplayName: "출생코드 - AI 사주 팔자"
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        CFBundleIconName: AppIcon
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations:
