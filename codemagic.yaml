@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: birthcode02_asc_key   # name of the API key integration added in Codemagic UI (Team settings -> Integrations -> App Store Connect)
+      app_store_connect: CodemagicASC   # name of the API key integration added in Codemagic UI (Personal account settings -> Integrations -> Developer Portal)
     environment:
       ios_signing:
         distribution_type: app_store

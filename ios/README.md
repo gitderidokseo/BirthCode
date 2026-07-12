@@ -13,7 +13,7 @@ Xcode 없이(맥 없이) [Codemagic](https://codemagic.io)에서 빌드하도록
 ## 시작 전 필요한 것 (Codemagic 빌드 전 준비)
 1. **App Store Connect에 5개 소모성 인앱 구매 상품** 등록: `basic`, `saju_haiku`, `saju_sonnet`, `saju_opus`, `saju_fable`
 2. **Firebase 콘솔에 iOS 앱 추가** (프로젝트 `birthcode02`, 번들 ID `com.doongdallong.birthcode02`) → 다운로드한 `GoogleService-Info.plist`로 `Resources/GoogleService-Info.plist`의 placeholder를 교체. App Check에서 **App Attest** provider 활성화.
-3. **App Store Connect API 키** 생성 후 Codemagic 팀 설정(웹 UI)에 `birthcode02_asc_key`라는 이름으로 등록 (`codemagic.yaml`의 `integrations.app_store_connect` 값과 일치해야 함).
+3. **App Store Connect API 키** 생성 후 Codemagic 계정 설정(웹 UI)에 등록 (`codemagic.yaml`의 `integrations.app_store_connect` 값과 이름이 일치해야 함. 현재는 기존 키 `CodemagicASC` 재사용).
 4. **Apple 서버 API 키**(별도 In-App Purchase 용 `.p8`, Key ID, Issuer ID) → Firebase Functions 환경변수 `APPLE_ISSUER_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, `APPLE_BUNDLE_ID`로 등록.
 5. **Apple 루트 인증서**를 `functions/certs/`에 배치 (`functions/certs/README.md` 참고) — 서버가 iOS 결제 서명을 검증하는 데 필요.
 6. Codemagic에 이 GitHub 저장소(`doongdallong/BirthCodeMansereok`) 연결.
