@@ -152,7 +152,7 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
             callJS(callback, args: [""])
             return
         }
-        user.getIDToken(forcingRefresh: false) { [weak self] token, error in
+        user.getIDTokenForcingRefresh(false) { [weak self] token, error in
             let value = token ?? ""
             if let error {
                 print("Auth: failed to get ID token: \(error)")
