@@ -17,8 +17,8 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: Sources
-    resources:
       - path: Resources/Assets.xcassets
+    resources:
       - path: Resources/Web
         type: folder
       - path: Resources/GoogleService-Info.plist
