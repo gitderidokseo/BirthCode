@@ -6,6 +6,11 @@ workflows:
     integrations:
       app_store_connect: CodemagicASC   # name of the API key integration added in Codemagic UI (Personal account settings -> Integrations -> Developer Portal)
     environment:
+      ios_signing:
+        provisioning_profiles:
+          - "birthcode02_distribution26/7/12"
+        certificates:
+          - "birthcode02_distribution"
       vars:
         XCODE_PROJECT: "ios/BirthCode.xcodeproj"
         XCODE_SCHEME: "BirthCode"
@@ -25,12 +30,6 @@ workflows:
         script: |
           cd ios
           xcodegen generate
-
-      - name: Set up keychain
-        script: keychain initialize
-
-      - name: Add certificates to keychain
-        script: keychain add-certificates
 
       - name: Use automatic signing
         script: |
