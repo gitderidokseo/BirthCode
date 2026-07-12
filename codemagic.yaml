@@ -6,9 +6,6 @@ workflows:
     integrations:
       app_store_connect: CodemagicASC   # name of the API key integration added in Codemagic UI (Personal account settings -> Integrations -> Developer Portal)
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.doongdallong.birthcode02
       vars:
         XCODE_PROJECT: "ios/BirthCode.xcodeproj"
         XCODE_SCHEME: "BirthCode"
