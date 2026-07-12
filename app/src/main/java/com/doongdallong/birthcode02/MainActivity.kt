@@ -223,6 +223,9 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
     inner class WebAppInterface {
         @JavascriptInterface
+        fun getPlatform(): String = "android"
+
+        @JavascriptInterface
         fun startPayment(productId: String) {
             if (!billingClient.isReady) {
                 Log.w("Billing", "BillingClient is not ready. Trying to connect...")

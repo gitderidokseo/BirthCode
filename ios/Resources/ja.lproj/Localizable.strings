@@ -1,0 +1,5 @@
+"app_name" = "出生코드";
+"msg_payment_cancelled" = "決済がキャンセルされました。";
+"msg_error_occurred" = "エラーが発生しました: %@";
+"msg_loading_payment" = "決済情報を読み込み中です。しばらくしてからもう一度お試しください。";
+"msg_product_not_found" = "商品情報が見つかりません。(ID: %@)";

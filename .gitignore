@@ -46,6 +46,14 @@ captures/
 *.apk
 *.aab
 *.ap_
+*.ipa
+
+# iOS (Codemagic regenerates the Xcode project from ios/project.yml via
+# `xcodegen generate`, and syncs ios/Resources/Web from app/src/main/assets
+# at build time — neither should be committed)
+ios/*.xcodeproj/
+ios/Resources/Web/
+ios/DerivedData/
 
 # Logs
 lint/

@@ -380,7 +380,8 @@ window.onPaymentSuccess = async function (purchaseToken) {
                     birthDate: birthDate,
                     aiModel: document.getElementById('ai-model-select')?.value || 'Opus',
                     language: language,
-                    purchaseToken: purchaseToken // 결제 토큰 추가
+                    purchaseToken: purchaseToken, // 결제 토큰 추가
+                    platform: (typeof Android !== 'undefined' && Android.getPlatform) ? Android.getPlatform() : 'android'
                 })
             }
         );

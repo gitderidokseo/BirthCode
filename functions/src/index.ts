@@ -4,6 +4,7 @@ import { OpenAI } from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { google } from "googleapis";
+import { verifyApplePurchase } from "./appleVerification";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -22,6 +23,8 @@ interface SajuRequest {
   aiModel: string;
   language: string;
   purchaseToken: string;
+  // Absent on older Android clients (predates the iOS port) — treated as "android".
+  platform?: "ios" | "android";
 }
 
 interface SajuResponse {
@@ -277,7 +280,7 @@ export const analyzeSaju = onRequest(
         return;
       }
 
-      const { birthDate, aiModel, language, purchaseToken }: SajuRequest = request.body;
+      const { birthDate, aiModel, language, purchaseToken, platform }: SajuRequest = request.body;
 
       if (!birthDate || !aiModel || !language || !purchaseToken) {
         response.status(400).json({ error: "Missing required fields" });
@@ -290,12 +293,27 @@ export const analyzeSaju = onRequest(
         return;
       }
 
+      const isIOS = platform === "ios";
+
+      // 3. 실제 결제 여부 검증 (필수) — 안드로이드는 Google Play API, iOS는 Apple 서명 트랜잭션 검증.
+      // productId를 aiModel 등급으로 강제 지정하므로, 저가 상품 토큰으로 고가 등급을 요청하면 검증에서 실패한다.
+      // replay 방지용 Firestore 키: 안드로이드는 purchaseToken 그대로, iOS는 검증 과정에서 얻는 transactionId.
+      let replayGuardKey = purchaseToken;
+      let isValidPurchase: boolean;
+      if (isIOS) {
+        const result = await verifyApplePurchase(purchaseToken, tierConfig.productId);
+        isValidPurchase = result.valid;
+        if (result.transactionId) replayGuardKey = result.transactionId;
+      } else {
+        isValidPurchase = await verifyPurchase(purchaseToken, tierConfig.productId);
+      }
+
       // 2. 토큰 중복 사용(Replay Attack) 방지 (Firestore 연결 실패 시에도 진행되도록 예외 처리)
-      const tokenRef = db.collection("used_purchase_tokens").doc(purchaseToken);
+      const tokenRef = db.collection("used_purchase_tokens").doc(replayGuardKey);
       try {
         const tokenDoc = await tokenRef.get();
         if (tokenDoc.exists) {
-          console.warn("Purchase token already used:", purchaseToken);
+          console.warn("Purchase token already used:", replayGuardKey);
           response.status(403).json({ error: "Purchase token already used" });
           return;
         }
@@ -303,11 +321,8 @@ export const analyzeSaju = onRequest(
         console.error("Firestore Error (Check if API is enabled):", err);
       }
 
-      // 3. 실제 결제 여부 검증 (Google Play API 호출 - 필수)
-      // productId를 aiModel 등급으로 강제 지정하므로, 저가 상품 토큰으로 고가 등급을 요청하면 Play API 검증에서 실패한다.
-      const isValidPurchase = await verifyPurchase(purchaseToken, tierConfig.productId);
       if (!isValidPurchase) {
-        console.warn("Invalid purchase verification for token:", purchaseToken);
+        console.warn("Invalid purchase verification for token:", replayGuardKey);
         response.status(402).json({ error: "Invalid or unauthorized purchase" });
         return;
       }
@@ -318,7 +333,8 @@ export const analyzeSaju = onRequest(
         await tokenRef.set({
           uid: decodedToken.uid,
           usedAt: admin.firestore.FieldValue.serverTimestamp(),
-          birthDate: birthDate
+          birthDate: birthDate,
+          platform: isIOS ? "ios" : "android",
         });
       } catch (err) {
         console.error("Firestore Save Error:", err);

@@ -1,0 +1,5 @@
+"app_name" = "KodUrodzenia";
+"msg_payment_cancelled" = "Płatność anulowana.";
+"msg_error_occurred" = "Wystąpił błąd: %@";
+"msg_loading_payment" = "Ładowanie informacji o płatności. Spróbuj ponownie za chwilę.";
+"msg_product_not_found" = "Nie znaleziono informacji o produkcie. (ID: %@)";

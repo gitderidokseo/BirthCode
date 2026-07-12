@@ -1,0 +1,5 @@
+"app_name" = "CodeNaissance";
+"msg_payment_cancelled" = "Paiement annulé.";
+"msg_error_occurred" = "Une erreur est survenue : %@";
+"msg_loading_payment" = "Chargement des informations de paiement. Veuillez réessayer dans un instant.";
+"msg_product_not_found" = "Informations sur le produit introuvables. (ID : %@)";

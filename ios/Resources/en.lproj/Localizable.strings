@@ -1,0 +1,5 @@
+"app_name" = "BirthCode";
+"msg_payment_cancelled" = "Payment cancelled.";
+"msg_error_occurred" = "An error occurred: %@";
+"msg_loading_payment" = "Loading payment info. Please try again in a moment.";
+"msg_product_not_found" = "Product information not found. (ID: %@)";

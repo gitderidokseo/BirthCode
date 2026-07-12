@@ -1,0 +1,63 @@
+workflows:
+  ios-birthcode:
+    name: BirthCode iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: birthcode02_asc_key   # name of the API key integration added in Codemagic UI (Team settings -> Integrations -> App Store Connect)
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.doongdallong.birthcode02
+      vars:
+        XCODE_PROJECT: "ios/BirthCode.xcodeproj"
+        XCODE_SCHEME: "BirthCode"
+        BUNDLE_ID: "com.doongdallong.birthcode02"
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: brew install xcodegen
+
+      - name: Sync shared web assets from Android source of truth
+        script: |
+          rm -rf ios/Resources/Web
+          mkdir -p ios/Resources/Web
+          cp -R app/src/main/assets/* ios/Resources/Web/
+
+      - name: Generate Xcode project
+        script: |
+          cd ios
+          xcodegen generate
+
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Set up keychain
+        script: keychain initialize
+
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+
+      - name: Use automatic signing
+        script: |
+          xcode-project use-profiles \
+            --project "$XCODE_PROJECT"
+
+      - name: Build ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

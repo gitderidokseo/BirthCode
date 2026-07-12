@@ -1,0 +1,92 @@
+name: BirthCode
+options:
+  bundleIdPrefix: com.doongdallong
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+
+packages:
+  FirebaseiOS:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 10.29.0
+
+targets:
+  BirthCode:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Sources
+    resources:
+      - path: Resources/Web
+        type: folder
+      - path: Resources/GoogleService-Info.plist
+      - path: Resources/ko.lproj
+        type: folder
+      - path: Resources/en.lproj
+        type: folder
+      - path: Resources/ja.lproj
+        type: folder
+      - path: Resources/de.lproj
+        type: folder
+      - path: Resources/es.lproj
+        type: folder
+      - path: Resources/fr.lproj
+        type: folder
+      - path: Resources/it.lproj
+        type: folder
+      - path: Resources/pl.lproj
+        type: folder
+      - path: Resources/pt.lproj
+        type: folder
+      - path: Resources/ar.lproj
+        type: folder
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleDisplayName: "출생코드 - AI 사주 팔자"
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: "Default Configuration"
+                UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).SceneDelegate"
+        CFBundleLocalizations:
+          - ko
+          - en
+          - ja
+          - de
+          - es
+          - fr
+          - it
+          - pl
+          - pt
+          - ar
+        CFBundleDevelopmentRegion: ko
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.doongdallong.birthcode02
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: NO
+    dependencies:
+      - package: FirebaseiOS
+        product: FirebaseAuth
+      - package: FirebaseiOS
+        product: FirebaseAppCheck
+      - package: FirebaseiOS
+        product: FirebaseAnalytics
+
+schemes:
+  BirthCode:
+    build:
+      targets:
+        BirthCode: all
+    run:
+      config: Debug
+    archive:
+      config: Release

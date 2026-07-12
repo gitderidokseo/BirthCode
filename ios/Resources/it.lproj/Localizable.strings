@@ -1,0 +1,5 @@
+"app_name" = "CodiceNascita";
+"msg_payment_cancelled" = "Pagamento annullato.";
+"msg_error_occurred" = "Si è verificato un errore: %@";
+"msg_loading_payment" = "Caricamento delle informazioni di pagamento. Riprova tra un momento.";
+"msg_product_not_found" = "Informazioni sul prodotto non trovate. (ID: %@)";

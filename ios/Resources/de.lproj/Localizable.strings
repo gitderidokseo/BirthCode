@@ -1,0 +1,5 @@
+"app_name" = "GeburtsCode";
+"msg_payment_cancelled" = "Zahlung abgebrochen.";
+"msg_error_occurred" = "Ein Fehler ist aufgetreten: %@";
+"msg_loading_payment" = "Zahlungsinformationen werden geladen. Bitte versuchen Sie es in einem Moment erneut.";
+"msg_product_not_found" = "Produktinformationen nicht gefunden. (ID: %@)";
