@@ -120,6 +120,31 @@ function applyTranslations() {
             el.placeholder = t[key];
         }
     });
+
+    applyDefaultLongitude();
+}
+
+function applyDefaultLongitude() {
+    const longitudeInput = document.getElementById('longitude');
+    if (!longitudeInput) return;
+
+    // 언어권에 맞는 경도 기본값 (예: 태국 - 방콕 100.5)
+    const defaultLongitudeByLang = { th: 100.5 };
+    longitudeInput.value = defaultLongitudeByLang[currentLang] ?? 127.0;
+    longitudeInput.placeholder = currentLang === 'th' ? 'เช่น: 100.5' : '예: 127.0';
+
+    // GPS가 켜져 있고 위치 권한이 허용된 경우, 현재 위치의 경도로 대체
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                longitudeInput.value = position.coords.longitude.toFixed(1);
+            },
+            () => {
+                // GPS 꺼짐/권한 거부/실패 시 위에서 설정한 언어별 기본값 유지
+            },
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
+    }
 }
 
 function getT() {

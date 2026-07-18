@@ -42,6 +42,8 @@ targets:
         type: folder
       - path: Resources/ar.lproj
         type: folder
+      - path: Resources/th.lproj
+        type: folder
     info:
       path: Resources/Info.plist
       properties:
@@ -70,6 +72,7 @@ targets:
           - pl
           - pt
           - ar
+          - th
         CFBundleDevelopmentRegion: ko
     settings:
       base:

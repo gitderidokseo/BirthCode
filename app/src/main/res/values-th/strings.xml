@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">รหัสวันเกิด</string>
+    <string name="msg_payment_cancelled">การชำระเงินถูกยกเลิก</string>
+    <string name="msg_error_occurred">เกิดข้อผิดพลาด: %1$s</string>
+    <string name="msg_loading_payment">กำลังโหลดข้อมูลการชำระเงิน กรุณาลองใหม่อีกครั้งในอีกสักครู่</string>
+    <string name="msg_product_not_found">ไม่พบข้อมูลสินค้า (ID: %1$s)</string>
+</resources>

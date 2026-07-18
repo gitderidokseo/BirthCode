@@ -1,7 +1,10 @@
 package com.doongdallong.birthcode02
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.webkit.GeolocationPermissions
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -9,6 +12,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
@@ -40,6 +45,10 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     // "basic" is kept for backward compatibility with already-published app versions.
     private val PRODUCT_IDS = listOf("basic", "saju_haiku", "saju_sonnet", "saju_opus", "saju_fable")
 
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -54,6 +63,8 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             PlayIntegrityAppCheckProviderFactory.getInstance()
         )
 
+        requestLocationPermissionIfNeeded()
+
         webView = findViewById(R.id.webView)
         webView.settings.apply {
             javaScriptEnabled = true
@@ -62,11 +73,22 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             allowFileAccessFromFileURLs = true
             allowUniversalAccessFromFileURLs = true
             databaseEnabled = true
+            setGeolocationEnabled(true)
             setSupportMultipleWindows(false)
         }
 
         webView.addJavascriptInterface(WebAppInterface(), "Android")
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?
+            ) {
+                val granted = ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                callback?.invoke(origin, granted, false)
+            }
+        }
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
@@ -79,6 +101,18 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
         webView.loadUrl("file:///android_asset/index.html")
 
         initBillingClient()
+    }
+
+    private fun requestLocationPermissionIfNeeded() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        }
     }
 
     private fun signInAnonymously() {
