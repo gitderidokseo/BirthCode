@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initLanguage() {
-    // navigator.language에서 언어 코드 추출 (예: 'ko-KR' -> 'ko')
-    const userLang = (navigator.language || 'ko').split('-')[0];
+    // TEMP: 태국어 스크린샷용 임시 강제 지정 - main에 병합하지 말 것
+    const userLang = 'th';
+    // const userLang = (navigator.language || 'ko').split('-')[0];
     currentLang = translations[userLang] ? userLang : 'ko';
 
     // UI 번역 적용
